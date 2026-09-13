@@ -1,0 +1,241 @@
+h2 {
+  font-size: 24px;
+}
+
+.descricao {
+  color: var(--cor-texto-suave);
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 52ch;
+  margin: 8px 0 32px;
+}
+
+.formulario {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 420px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--cor-texto-suave);
+}
+
+.campo input {
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--cor-texto);
+  background: var(--cor-painel);
+}
+
+.campo input:focus {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 1px;
+  border-color: var(--cor-primaria);
+}
+
+.linha-dois-campos {
+  display: flex;
+  gap: 12px;
+}
+
+.linha-dois-campos .campo {
+  flex: 1;
+}
+
+.campo-curto {
+  max-width: 80px;
+}
+
+.botao-primario {
+  align-self: flex-start;
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  margin-top: 8px;
+}
+
+.botao-primario:hover {
+  background: var(--cor-primaria-hover);
+}
+
+.confirmacao {
+  color: var(--cor-primaria);
+  font-size: 13px;
+}
+
+.lista-titulo {
+  margin-top: 48px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.lista-condominios {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--cor-borda);
+}
+
+.item-condominio {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--cor-borda);
+}
+
+.item-condominio strong {
+  font-size: 15px;
+}
+
+.item-condominio p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--cor-texto-suave);
+}
+
+.botao-remover {
+  background: transparent;
+  border: 1px solid var(--cor-erro);
+  color: var(--cor-erro);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.botao-remover:hover {
+  background: var(--cor-erro);
+  color: #FFFFFF;
+}
+
+.tela-login {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--cor-fundo);
+}
+
+.cartao-login {
+  background: var(--cor-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: 6px;
+  padding: 40px;
+  width: 100%;
+  max-width: 340px;
+}
+
+.login-titulo {
+  font-size: 22px;
+  margin-bottom: 4px;
+}
+
+.erro-login {
+  color: var(--cor-erro);
+  font-size: 13px;
+  margin: -6px 0 0;
+}
+
+.dica-login {
+  font-size: 12px;
+  color: var(--cor-texto-suave);
+  margin-top: 4px;
+}
+
+.dica-login code {
+  background: var(--cor-fundo);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+.seletor-condominio {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  color: #9FB0C2;
+  margin: 20px 0 8px;
+}
+
+.seletor-condominio select {
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.06);
+  color: #FFFFFF;
+  font-size: 13px;
+}
+
+.seletor-condominio select option {
+  color: #1B1E1A;
+}
+
+.botao-secundario {
+  background: transparent;
+  border: 1px solid var(--cor-borda);
+  color: var(--cor-texto);
+  padding: 9px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.botao-secundario:hover {
+  border-color: var(--cor-primaria);
+}
+
+.nav-sair {
+  margin-top: auto;
+  color: #E3B9AC;
+}
+
+.nav-sair:hover {
+  background: rgba(179, 67, 43, 0.25);
+  color: #FFFFFF;
+}
+
+.aviso-vazio {
+  font-size: 13px;
+  color: var(--cor-acento);
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px dashed var(--cor-borda);
+  border-radius: 4px;
+}
+
+.item-condominio-acoes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.selo {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.selo-ativo {
+  color: var(--cor-primaria);
+  border-color: var(--cor-primaria);
+}
+
+.selo-inativo {
+  color: var(--cor-texto-suave);
+  border-color: var(--cor-borda);
+}
