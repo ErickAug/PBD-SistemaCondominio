@@ -59,7 +59,6 @@ public class UnidadeService {
             throw new RegraDeNegocioException("Não é possível excluir: existe morador vinculado a esta unidade.");
         }
 
-        // TODO: quando a entidade Cobranca existir, checar tambem cobrancas vinculadas antes de excluir.
 
         unidadeRepository.deleteById(unidadeId);
     }
@@ -110,6 +109,57 @@ public class UnidadeService {
         }
 
         return bloco;
+    }
+
+    public Unidade cadastrarParaSindico(Unidade unidade, Long blocoId, Long condominioIdAutenticado) {
+        Bloco bloco = blocoRepository.findById(blocoId)
+                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
+
+        if (!bloco.getCondominio().getId().equals(condominioIdAutenticado)) {
+            throw new RegraDeNegocioException("Acesso negado a este bloco.");
+        }
+
+        validarFracaoIdeal(unidade.getFracaoIdeal());
+
+        if (unidadeRepository.existsByNumeroAndBlocoId(unidade.getNumero(), blocoId)) {
+            throw new RegraDeNegocioException("Já existe uma unidade com este número neste bloco.");
+        }
+
+        unidade.setBloco(bloco);
+        return unidadeRepository.save(unidade);
+    }
+
+    public void excluirParaSindico(Long unidadeId, Long condominioIdAutenticado) {
+        Unidade unidade = unidadeRepository.findById(unidadeId)
+                .orElseThrow(() -> new RegraDeNegocioException("Unidade não encontrada."));
+
+        if (!unidade.getBloco().getCondominio().getId().equals(condominioIdAutenticado)) {
+            throw new RegraDeNegocioException("Acesso negado a esta unidade.");
+        }
+
+        if (usuarioRepository.existsByUnidadeId(unidadeId)) {
+            throw new RegraDeNegocioException("Não é possível excluir: existe morador vinculado a esta unidade.");
+        }
+
+        unidadeRepository.deleteById(unidadeId);
+    }
+
+    public List<Unidade> listarPorBlocoParaSindico(Long blocoId, Long condominioIdAutenticado) {
+        Bloco bloco = blocoRepository.findById(blocoId)
+                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
+
+        if (!bloco.getCondominio().getId().equals(condominioIdAutenticado)) {
+            throw new RegraDeNegocioException("Acesso negado a este bloco.");
+        }
+
+        return unidadeRepository.findByBlocoId(blocoId);
+    }
+
+    public StatusFracaoIdeal calcularStatusFracaoParaSindico(Long condominioId) {
+        BigDecimal soma = unidadeRepository.somarFracaoIdealPorCondominio(condominioId);
+        BigDecimal diferenca = CEM_POR_CENTO.subtract(soma);
+        boolean fechaEm100 = diferenca.compareTo(BigDecimal.ZERO) == 0;
+        return new StatusFracaoIdeal(soma, diferenca, fechaEm100);
     }
 
     public record StatusFracaoIdeal(BigDecimal somaAtual, BigDecimal diferencaParaFechar, boolean fechaEm100) {
