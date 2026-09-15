@@ -47,4 +47,8 @@ public class Usuario {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "condominio_id", nullable = true)
     private Condominio condominio;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unidade_id", nullable = true)
+    private Unidade unidade;
 }
