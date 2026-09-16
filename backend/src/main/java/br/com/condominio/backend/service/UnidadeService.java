@@ -2,10 +2,7 @@ package br.com.condominio.backend.service;
 
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Bloco;
-import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.model.Unidade;
-import br.com.condominio.backend.repository.BlocoRepository;
-import br.com.condominio.backend.repository.CondominioRepository;
 import br.com.condominio.backend.repository.UnidadeRepository;
 import br.com.condominio.backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
@@ -20,51 +17,34 @@ public class UnidadeService {
     private static final BigDecimal CEM_POR_CENTO = new BigDecimal("100");
 
     private final UnidadeRepository unidadeRepository;
-    private final BlocoRepository blocoRepository;
-    private final CondominioRepository condominioRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public UnidadeService(UnidadeRepository unidadeRepository,
-                          BlocoRepository blocoRepository,
-                          CondominioRepository condominioRepository,
-                          UsuarioRepository usuarioRepository) {
+    public UnidadeService(UnidadeRepository unidadeRepository, UsuarioRepository usuarioRepository) {
         this.unidadeRepository = unidadeRepository;
-        this.blocoRepository = blocoRepository;
-        this.condominioRepository = condominioRepository;
         this.usuarioRepository = usuarioRepository;
     }
 
-    public Unidade cadastrar(Unidade unidade, Long blocoId, Long administradoraIdAutenticado) {
-        Bloco bloco = buscarBlocoValidandoTenant(blocoId, administradoraIdAutenticado);
-
+    public Unidade cadastrar(Unidade unidade, Bloco blocoJaValidado) {
         validarFracaoIdeal(unidade.getFracaoIdeal());
 
-        if (unidadeRepository.existsByNumeroAndBlocoId(unidade.getNumero(), blocoId)) {
+        if (unidadeRepository.existsByNumeroAndBlocoId(unidade.getNumero(), blocoJaValidado.getId())) {
             throw new RegraDeNegocioException("Já existe uma unidade com este número neste bloco.");
         }
 
-        unidade.setBloco(bloco);
+        unidade.setBloco(blocoJaValidado);
         return unidadeRepository.save(unidade);
     }
 
-    public void excluir(Long unidadeId, Long administradoraIdAutenticado) {
-        Unidade unidade = unidadeRepository.findById(unidadeId)
-                .orElseThrow(() -> new RegraDeNegocioException("Unidade não encontrada."));
-
-        if (!unidade.getBloco().getCondominio().getAdministradora().getId().equals(administradoraIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a esta unidade.");
-        }
-
-        if (usuarioRepository.existsByUnidadeId(unidadeId)) {
+    public void excluir(Unidade unidadeJaValidada) {
+        if (usuarioRepository.existsByUnidadeId(unidadeJaValidada.getId())) {
             throw new RegraDeNegocioException("Não é possível excluir: existe morador vinculado a esta unidade.");
         }
 
 
-        unidadeRepository.deleteById(unidadeId);
+        unidadeRepository.deleteById(unidadeJaValidada.getId());
     }
 
-    public List<Unidade> listarPorBloco(Long blocoId, Long administradoraIdAutenticado) {
-        buscarBlocoValidandoTenant(blocoId, administradoraIdAutenticado);
+    public List<Unidade> listarPorBloco(Long blocoId) {
         return unidadeRepository.findByBlocoId(blocoId);
     }
 
@@ -75,91 +55,32 @@ public class UnidadeService {
         return Set.copyOf(usuarioRepository.buscarIdsDeUnidadesOcupadas(unidadeIds));
     }
 
-    public StatusFracaoIdeal calcularStatusFracao(Long condominioId, Long administradoraIdAutenticado) {
-        Condominio condominio = condominioRepository.findById(condominioId)
-                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
-
-        if (!condominio.getAdministradora().getId().equals(administradoraIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este condomínio.");
-        }
-
+    public StatusFracaoIdeal calcularStatusFracao(Long condominioId) {
         BigDecimal soma = unidadeRepository.somarFracaoIdealPorCondominio(condominioId);
         BigDecimal diferenca = CEM_POR_CENTO.subtract(soma);
         boolean fechaEm100 = diferenca.compareTo(BigDecimal.ZERO) == 0;
 
         return new StatusFracaoIdeal(soma, diferenca, fechaEm100);
+    }
+
+    public Unidade buscarValidandoBloco(Long unidadeId, Long blocoId) {
+        Unidade unidade = unidadeRepository.findById(unidadeId)
+                .orElseThrow(() -> new RegraDeNegocioException("Unidade não encontrada."));
+
+        if (!unidade.getBloco().getId().equals(blocoId)) {
+            throw new RegraDeNegocioException("Esta unidade não pertence a este bloco.");
+        }
+
+        return unidade;
     }
 
     private void validarFracaoIdeal(BigDecimal fracaoIdeal) {
         if (fracaoIdeal == null || fracaoIdeal.compareTo(BigDecimal.ZERO) < 0) {
             throw new RegraDeNegocioException("A fração ideal não pode ser negativa.");
         }
-
         if (fracaoIdeal.compareTo(CEM_POR_CENTO) > 0) {
             throw new RegraDeNegocioException("A fração ideal não pode ser maior que 100%.");
         }
-    }
-
-    private Bloco buscarBlocoValidandoTenant(Long blocoId, Long administradoraIdAutenticado) {
-        Bloco bloco = blocoRepository.findById(blocoId)
-                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
-
-        if (!bloco.getCondominio().getAdministradora().getId().equals(administradoraIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este bloco.");
-        }
-
-        return bloco;
-    }
-
-    public Unidade cadastrarParaSindico(Unidade unidade, Long blocoId, Long condominioIdAutenticado) {
-        Bloco bloco = blocoRepository.findById(blocoId)
-                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
-
-        if (!bloco.getCondominio().getId().equals(condominioIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este bloco.");
-        }
-
-        validarFracaoIdeal(unidade.getFracaoIdeal());
-
-        if (unidadeRepository.existsByNumeroAndBlocoId(unidade.getNumero(), blocoId)) {
-            throw new RegraDeNegocioException("Já existe uma unidade com este número neste bloco.");
-        }
-
-        unidade.setBloco(bloco);
-        return unidadeRepository.save(unidade);
-    }
-
-    public void excluirParaSindico(Long unidadeId, Long condominioIdAutenticado) {
-        Unidade unidade = unidadeRepository.findById(unidadeId)
-                .orElseThrow(() -> new RegraDeNegocioException("Unidade não encontrada."));
-
-        if (!unidade.getBloco().getCondominio().getId().equals(condominioIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a esta unidade.");
-        }
-
-        if (usuarioRepository.existsByUnidadeId(unidadeId)) {
-            throw new RegraDeNegocioException("Não é possível excluir: existe morador vinculado a esta unidade.");
-        }
-
-        unidadeRepository.deleteById(unidadeId);
-    }
-
-    public List<Unidade> listarPorBlocoParaSindico(Long blocoId, Long condominioIdAutenticado) {
-        Bloco bloco = blocoRepository.findById(blocoId)
-                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
-
-        if (!bloco.getCondominio().getId().equals(condominioIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este bloco.");
-        }
-
-        return unidadeRepository.findByBlocoId(blocoId);
-    }
-
-    public StatusFracaoIdeal calcularStatusFracaoParaSindico(Long condominioId) {
-        BigDecimal soma = unidadeRepository.somarFracaoIdealPorCondominio(condominioId);
-        BigDecimal diferenca = CEM_POR_CENTO.subtract(soma);
-        boolean fechaEm100 = diferenca.compareTo(BigDecimal.ZERO) == 0;
-        return new StatusFracaoIdeal(soma, diferenca, fechaEm100);
     }
 
     public record StatusFracaoIdeal(BigDecimal somaAtual, BigDecimal diferencaParaFechar, boolean fechaEm100) {
