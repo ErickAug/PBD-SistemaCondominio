@@ -1,5 +1,7 @@
 package br.com.condominio.backend.security;
 
+import br.com.condominio.backend.model.enums.Perfil;
+import br.com.condominio.backend.model.Usuario;
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.model.Usuario;

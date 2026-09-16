@@ -40,7 +40,6 @@ public class UnidadeService {
             throw new RegraDeNegocioException("Não é possível excluir: existe morador vinculado a esta unidade.");
         }
 
-        // TODO: quando a entidade Cobranca existir, checar tambem cobrancas vinculadas antes de excluir.
 
         unidadeRepository.deleteById(unidadeJaValidada.getId());
     }
