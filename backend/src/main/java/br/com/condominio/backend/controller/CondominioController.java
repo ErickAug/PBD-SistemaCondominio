@@ -2,13 +2,11 @@ package br.com.condominio.backend.controller;
 
 import br.com.condominio.backend.dto.CondominioRequestDTO;
 import br.com.condominio.backend.dto.CondominioResponseDTO;
-import br.com.condominio.backend.dto.StatusFracaoIdealResponseDTO;
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.security.TenantAccessGuard;
 import br.com.condominio.backend.security.UsuarioDetailsImpl;
 import br.com.condominio.backend.service.CondominioService;
-import br.com.condominio.backend.service.UnidadeService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,14 +24,11 @@ import java.util.List;
 public class CondominioController {
 
     private final CondominioService condominioService;
-    private final UnidadeService unidadeService;
     private final TenantAccessGuard tenantAccessGuard;
 
     public CondominioController(CondominioService condominioService,
-                                UnidadeService unidadeService,
                                 TenantAccessGuard tenantAccessGuard) {
         this.condominioService = condominioService;
-        this.unidadeService = unidadeService;
         this.tenantAccessGuard = tenantAccessGuard;
     }
 
@@ -77,20 +72,5 @@ public class CondominioController {
                 condominio.getAdministradora().getId()
         );
     }
-    @GetMapping("/{condominioId}/fracao-ideal")
-    public ResponseEntity<StatusFracaoIdealResponseDTO> statusFracaoIdeal(
-            @PathVariable Long administradoraId,
-            @PathVariable Long condominioId,
-            @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
 
-        Long administradoraIdAutenticado = tenantAccessGuard.validarAdministradora(administradoraId, usuarioAutenticado);
-
-        UnidadeService.StatusFracaoIdeal status =
-                unidadeService.calcularStatusFracao(condominioId, administradoraIdAutenticado);
-
-        StatusFracaoIdealResponseDTO resposta = new StatusFracaoIdealResponseDTO(
-                status.somaAtual(), status.diferencaParaFechar(), status.fechaEm100());
-
-        return ResponseEntity.ok(resposta);
-    }
 }

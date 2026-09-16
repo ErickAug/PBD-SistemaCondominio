@@ -4,7 +4,6 @@ import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Bloco;
 import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.repository.BlocoRepository;
-import br.com.condominio.backend.repository.CondominioRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,37 +12,32 @@ import java.util.List;
 public class BlocoService {
 
     private final BlocoRepository blocoRepository;
-    private final CondominioRepository condominioRepository;
 
-    public BlocoService(BlocoRepository blocoRepository, CondominioRepository condominioRepository) {
+    public BlocoService(BlocoRepository blocoRepository) {
         this.blocoRepository = blocoRepository;
-        this.condominioRepository = condominioRepository;
     }
 
-    public Bloco cadastrar(Bloco bloco, Long condominioId, Long administradoraIdAutenticado) {
-        Condominio condominio = buscarCondominioValidandoTenant(condominioId, administradoraIdAutenticado);
-
-        if (blocoRepository.existsByNomeAndCondominioId(bloco.getNome(), condominioId)) {
+    public Bloco cadastrar(Bloco bloco, Condominio condominioJaValidado) {
+        if (blocoRepository.existsByNomeAndCondominioId(bloco.getNome(), condominioJaValidado.getId())) {
             throw new RegraDeNegocioException("Já existe um bloco com este nome neste condomínio.");
         }
 
-        bloco.setCondominio(condominio);
+        bloco.setCondominio(condominioJaValidado);
         return blocoRepository.save(bloco);
     }
 
-    public List<Bloco> listarPorCondominio(Long condominioId, Long administradoraIdAutenticado) {
-        buscarCondominioValidandoTenant(condominioId, administradoraIdAutenticado);
+    public List<Bloco> listarPorCondominio(Long condominioId) {
         return blocoRepository.findByCondominioId(condominioId);
     }
 
-    private Condominio buscarCondominioValidandoTenant(Long condominioId, Long administradoraIdAutenticado) {
-        Condominio condominio = condominioRepository.findById(condominioId)
-                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
+    public Bloco buscarValidandoCondominio(Long blocoId, Long condominioId) {
+        Bloco bloco = blocoRepository.findById(blocoId)
+                .orElseThrow(() -> new RegraDeNegocioException("Bloco não encontrado."));
 
-        if (!condominio.getAdministradora().getId().equals(administradoraIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este condomínio.");
+        if (!bloco.getCondominio().getId().equals(condominioId)) {
+            throw new RegraDeNegocioException("Este bloco não pertence a este condomínio.");
         }
 
-        return condominio;
+        return bloco;
     }
 }
