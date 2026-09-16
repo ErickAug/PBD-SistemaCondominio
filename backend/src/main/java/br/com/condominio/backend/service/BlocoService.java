@@ -40,20 +40,4 @@ public class BlocoService {
 
         return bloco;
     }
-
-    public Bloco cadastrarParaSindico(Bloco bloco, Long condominioId) {
-        Condominio condominio = condominioRepository.findById(condominioId)
-                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
-
-        if (blocoRepository.existsByNomeAndCondominioId(bloco.getNome(), condominioId)) {
-            throw new RegraDeNegocioException("Já existe um bloco com este nome neste condomínio.");
-        }
-
-        bloco.setCondominio(condominio);
-        return blocoRepository.save(bloco);
-    }
-
-    public List<Bloco> listarPorCondominioParaSindico(Long condominioId) {
-        return blocoRepository.findByCondominioId(condominioId);
-    }
 }
