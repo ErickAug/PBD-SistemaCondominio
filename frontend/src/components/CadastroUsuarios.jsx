@@ -1,55 +1,108 @@
 import { useState, useEffect } from 'react'
+import { criarUsuario, listarBlocos, listarUnidades } from '../services/api.js'
 
 const PERFIS = [
-  { valor: 'sindico', rotulo: 'Síndico' },
-  { valor: 'portaria', rotulo: 'Portaria' },
-  { valor: 'morador', rotulo: 'Morador' },
-  { valor: 'proprietario', rotulo: 'Proprietário' },
+  { valor: 'SINDICO', rotulo: 'Síndico' },
+  { valor: 'PORTARIA', rotulo: 'Portaria' },
+  { valor: 'MORADOR', rotulo: 'Morador' },
+  { valor: 'PROPRIETARIO', rotulo: 'Proprietário' },
 ]
+
+const PERFIS_COM_UNIDADE = ['MORADOR', 'PROPRIETARIO']
 
 const FORM_VAZIO = {
   nome: '',
   usuario: '',
   senha: '',
-  perfil: 'sindico',
-  condominioNome: '',
+  perfil: 'SINDICO',
+  blocoId: '',
+  unidadeId: '',
 }
 
-function CadastroUsuarios({ condominios, condominioAtivo }) {
+function CadastroUsuarios({ administradoraId, condominios, condominioAtivoId }) {
   const [usuarios, setUsuarios] = useState([])
   const [form, setForm] = useState(FORM_VAZIO)
+  const [blocos, setBlocos] = useState([])
+  const [unidades, setUnidades] = useState([])
   const [erro, setErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
+
+  const precisaDeUnidade = PERFIS_COM_UNIDADE.includes(form.perfil)
+  const condominioAtivo = condominios.find((c) => c.id === condominioAtivoId)
 
   useEffect(() => {
-    setForm((anterior) => ({ ...anterior, condominioNome: condominioAtivo }))
-  }, [condominioAtivo])
+    setForm(FORM_VAZIO)
+    setUnidades([])
+
+    if (!condominioAtivoId) {
+      setBlocos([])
+      return
+    }
+
+    listarBlocos(condominioAtivoId)
+      .then(setBlocos)
+      .catch((e) => setErro(e.message))
+  }, [condominioAtivoId])
+
+  useEffect(() => {
+    if (!precisaDeUnidade || !form.blocoId) {
+      setUnidades([])
+      return
+    }
+
+    listarUnidades(condominioAtivoId, form.blocoId)
+      .then(setUnidades)
+      .catch((e) => setErro(e.message))
+  }, [form.blocoId, precisaDeUnidade, condominioAtivoId])
 
   const usuariosDoCondominioAtivo = usuarios.filter(
-    (u) => u.condominioNome === condominioAtivo
+    (u) => u.condominioId === condominioAtivoId
   )
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target
-    setForm((anterior) => ({ ...anterior, [name]: value }))
+    setForm((anterior) => {
+      if (name === 'perfil') {
+        return { ...anterior, perfil: value, blocoId: '', unidadeId: '' }
+      }
+      if (name === 'blocoId') {
+        return { ...anterior, blocoId: value, unidadeId: '' }
+      }
+      return { ...anterior, [name]: value }
+    })
     setErro('')
   }
 
-  function cadastrarUsuario(evento) {
+  async function aoEnviar(evento) {
     evento.preventDefault()
+    setErro('')
 
-    const jaExiste = usuarios.some((u) => u.usuario === form.usuario)
-    if (jaExiste) {
-      setErro('Esse nome de usuário já está cadastrado. Escolha outro.')
+    if (precisaDeUnidade && !form.unidadeId) {
+      setErro('Selecione a unidade desse morador/proprietário.')
       return
     }
 
-    const novoUsuario = {
-      id: crypto.randomUUID(),
-      ...form,
-    }
+    setEnviando(true)
+    try {
+      const usuarioCriado = await criarUsuario(administradoraId, {
+        nome: form.nome,
+        usuario: form.usuario,
+        senha: form.senha,
+        perfil: form.perfil,
+        condominioId: condominioAtivoId,
+        unidadeId: precisaDeUnidade ? Number(form.unidadeId) : null,
+      })
 
-    setUsuarios((anterior) => [...anterior, novoUsuario])
-    setForm({ ...FORM_VAZIO, condominioNome: condominioAtivo })
+      setUsuarios((anterior) => [
+        ...anterior,
+        { ...usuarioCriado, condominioId: condominioAtivoId },
+      ])
+      setForm(FORM_VAZIO)
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setEnviando(false)
+    }
   }
 
   return (
@@ -58,96 +111,130 @@ function CadastroUsuarios({ condominios, condominioAtivo }) {
       <p className="descricao">
         Não há auto-cadastro: só a administradora cria acessos. Cada
         usuário pertence a exatamente um condomínio e um perfil. Você
-        está vendo os usuários de <strong>{condominioAtivo}</strong> —
-        troque o condomínio ativo na barra lateral pra ver outro.
+        está vendo os usuários de{' '}
+        <strong>{condominioAtivo?.nome ?? '—'}</strong> — troque o
+        condomínio ativo na barra lateral pra ver outro.
       </p>
 
-      <form onSubmit={cadastrarUsuario} className="formulario">
-        <label className="campo">
-          <span>Nome completo</span>
-          <input
-            name="nome"
-            value={form.nome}
-            onChange={atualizarCampo}
-            placeholder="Ex: Carlos Silva"
-            required
-          />
-        </label>
+      {!condominioAtivoId ? (
+        <p className="aviso-vazio">
+          Selecione um condomínio na barra lateral antes de cadastrar
+          usuários.
+        </p>
+      ) : (
+        <form onSubmit={aoEnviar} className="formulario">
+          <label className="campo">
+            <span>Nome completo</span>
+            <input
+              name="nome"
+              value={form.nome}
+              onChange={atualizarCampo}
+              placeholder="Ex: Carlos Silva"
+              required
+            />
+          </label>
 
-        <label className="campo">
-          <span>Nome de usuário (login)</span>
-          <input
-            name="usuario"
-            value={form.usuario}
-            onChange={atualizarCampo}
-            placeholder="Ex: carlos.silva"
-            required
-          />
-        </label>
+          <label className="campo">
+            <span>Nome de usuário (login)</span>
+            <input
+              name="usuario"
+              value={form.usuario}
+              onChange={atualizarCampo}
+              placeholder="Ex: carlos.silva"
+              required
+            />
+          </label>
 
-        <label className="campo">
-          <span>Senha provisória</span>
-          <input
-            type="password"
-            name="senha"
-            value={form.senha}
-            onChange={atualizarCampo}
-            required
-          />
-        </label>
-
-        <label className="campo">
-          <span>Perfil</span>
-          <select name="perfil" value={form.perfil} onChange={atualizarCampo}>
-            {PERFIS.map((p) => (
-              <option key={p.valor} value={p.valor}>
-                {p.rotulo}
-              </option>
-            ))}
-          </select>
-        </label>
-
-        <label className="campo">
-          <span>Condomínio</span>
-          {condominios.length === 0 ? (
-            <p className="aviso-vazio">
-              Nenhum condomínio cadastrado ainda — cadastre um na aba
-              "Condomínios" antes de criar usuários.
-            </p>
-          ) : (
-            <select
-              name="condominioNome"
-              value={form.condominioNome}
+          <label className="campo">
+            <span>Senha provisória</span>
+            <input
+              type="password"
+              name="senha"
+              value={form.senha}
               onChange={atualizarCampo}
               required
-            >
-              <option value="" disabled>
-                Selecione um condomínio
-              </option>
-              {condominios.map((c) => (
-                <option key={c.id} value={c.nome}>
-                  {c.nome}
+            />
+          </label>
+
+          <label className="campo">
+            <span>Perfil</span>
+            <select name="perfil" value={form.perfil} onChange={atualizarCampo}>
+              {PERFIS.map((p) => (
+                <option key={p.valor} value={p.valor}>
+                  {p.rotulo}
                 </option>
               ))}
             </select>
+          </label>
+
+          {precisaDeUnidade && (
+            <>
+              <label className="campo">
+                <span>Bloco</span>
+                {blocos.length === 0 ? (
+                  <p className="aviso-vazio">
+                    Nenhum bloco cadastrado nesse condomínio ainda.
+                  </p>
+                ) : (
+                  <select
+                    name="blocoId"
+                    value={form.blocoId}
+                    onChange={atualizarCampo}
+                    required
+                  >
+                    <option value="" disabled>
+                      Selecione o bloco
+                    </option>
+                    {blocos.map((b) => (
+                      <option key={b.id} value={b.id}>
+                        {b.nome}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </label>
+
+              {form.blocoId && (
+                <label className="campo">
+                  <span>Unidade</span>
+                  {unidades.length === 0 ? (
+                    <p className="aviso-vazio">
+                      Nenhuma unidade cadastrada nesse bloco ainda.
+                    </p>
+                  ) : (
+                    <select
+                      name="unidadeId"
+                      value={form.unidadeId}
+                      onChange={atualizarCampo}
+                      required
+                    >
+                      <option value="" disabled>
+                        Selecione a unidade
+                      </option>
+                      {unidades.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          Unidade {u.numero}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </label>
+              )}
+            </>
           )}
-        </label>
 
-        {erro && <p className="erro-login">{erro}</p>}
+          {erro && <p className="erro-login">{erro}</p>}
 
-        <button
-          type="submit"
-          className="botao-primario"
-          disabled={condominios.length === 0}
-        >
-          Cadastrar usuário
-        </button>
-      </form>
+          <button type="submit" className="botao-primario" disabled={enviando}>
+            {enviando ? 'Salvando...' : 'Cadastrar usuário'}
+          </button>
+        </form>
+      )}
 
       <h3 className="lista-titulo">
         {usuariosDoCondominioAtivo.length === 0
-          ? `Nenhum usuário cadastrado em ${condominioAtivo} ainda`
-          : `${usuariosDoCondominioAtivo.length} usuário(s) cadastrado(s) em ${condominioAtivo}`}
+          ? `Nenhum usuário cadastrado em ${condominioAtivo?.nome ?? 'ㅤ'} ainda`
+          : `${usuariosDoCondominioAtivo.length} usuário(s) cadastrado(s) em ${condominioAtivo?.nome ?? 'ㅤ'}`}
       </h3>
 
       <ul className="lista-condominios">
@@ -156,8 +243,9 @@ function CadastroUsuarios({ condominios, condominioAtivo }) {
             <div>
               <strong>{usuario.nome}</strong>
               <p>
-                @{usuario.usuario} · {PERFIS.find((p) => p.valor === usuario.perfil)?.rotulo} ·{' '}
-                {usuario.condominioNome}
+                @{usuario.usuario} ·{' '}
+                {PERFIS.find((p) => p.valor === usuario.perfil)?.rotulo}
+                {usuario.unidadeId ? ` · unidade ${usuario.unidadeId}` : ''}
               </p>
             </div>
           </li>

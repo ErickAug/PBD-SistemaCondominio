@@ -14,15 +14,7 @@ function Login({ onLogin }) {
 
     try {
       const usuarioAutenticado = await login(usuario, senha)
-
-      const usuarioComDadosTemporarios = {
-        ...usuarioAutenticado,
-        nome: 'Admin Master (dados temporários)',
-        perfil: 'administradora',
-        condominios: ['Residencial Teste'],
-      }
-
-      onLogin(usuarioComDadosTemporarios)
+      onLogin(usuarioAutenticado)
     } catch {
       setErro('Usuário ou senha inválidos.')
     } finally {
