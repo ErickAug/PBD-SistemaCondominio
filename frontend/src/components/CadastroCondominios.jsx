@@ -1,37 +1,44 @@
 import { useState } from 'react'
+import { criarCondominio } from '../services/api.js'
 
-
-function CadastroCondominios({ condominios, setCondominios }) {
+function CadastroCondominios({ administradoraId, condominios, setCondominios, erroCarregamento }) {
   const [form, setForm] = useState({
     nome: '',
     endereco: '',
     cidade: '',
     uf: '',
     cnpj: '',
-    situacao: 'ativo',
+    situacao: 'ATIVO',
   })
+  const [erro, setErro] = useState('')
+  const [enviando, setEnviando] = useState(false)
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target
     setForm((anterior) => ({ ...anterior, [name]: value }))
+    setErro('')
   }
 
-  function adicionarCondominio(evento) {
+  async function adicionarCondominio(evento) {
     evento.preventDefault()
+    setEnviando(true)
+    setErro('')
 
-    const novoCondominio = {
-      id: crypto.randomUUID(),
-      ...form,
+    try {
+      const enderecoCompleto = `${form.endereco}, ${form.cidade}/${form.uf}`
+      const novoCondominio = await criarCondominio(administradoraId, {
+        nome: form.nome,
+        endereco: enderecoCompleto,
+        cnpj: form.cnpj,
+        situacao: form.situacao,
+      })
+      setCondominios((listaAnterior) => [...listaAnterior, novoCondominio])
+      setForm({ nome: '', endereco: '', cidade: '', uf: '', cnpj: '', situacao: 'ATIVO' })
+    } catch (erroRequisicao) {
+      setErro(erroRequisicao.message)
+    } finally {
+      setEnviando(false)
     }
-
-    setCondominios((listaAnterior) => [...listaAnterior, novoCondominio])
-    setForm({ nome: '', endereco: '', cidade: '', uf: '', cnpj: '', situacao: 'ativo' })
-  }
-
-  function removerCondominio(id) {
-    setCondominios((listaAnterior) =>
-      listaAnterior.filter((condominio) => condominio.id !== id)
-    )
   }
 
   return (
@@ -42,6 +49,8 @@ function CadastroCondominios({ condominios, setCondominios }) {
         porteiros e moradores de um condomínio nunca devem enxergar
         dados de outro.
       </p>
+
+      {erroCarregamento && <p className="erro-login">{erroCarregamento}</p>}
 
       <form onSubmit={adicionarCondominio} className="formulario">
         <label className="campo">
@@ -104,13 +113,15 @@ function CadastroCondominios({ condominios, setCondominios }) {
         <label className="campo">
           <span>Situação</span>
           <select name="situacao" value={form.situacao} onChange={atualizarCampo}>
-            <option value="ativo">Ativo</option>
-            <option value="inativo">Inativo</option>
+            <option value="ATIVO">Ativo</option>
+            <option value="INATIVO">Inativo</option>
           </select>
         </label>
 
-        <button type="submit" className="botao-primario">
-          Adicionar condomínio
+        {erro && <p className="erro-login">{erro}</p>}
+
+        <button type="submit" className="botao-primario" disabled={enviando}>
+          {enviando ? 'Salvando...' : 'Adicionar condomínio'}
         </button>
       </form>
 
@@ -125,29 +136,16 @@ function CadastroCondominios({ condominios, setCondominios }) {
           <li key={condominio.id} className="item-condominio">
             <div>
               <strong>{condominio.nome}</strong>
-              <p>
-                {condominio.endereco} — {condominio.cidade}/{condominio.uf}
-              </p>
+              <p>{condominio.endereco}</p>
               <p>CNPJ: {condominio.cnpj}</p>
             </div>
-            <div className="item-condominio-acoes">
-              <span
-                className={
-                  condominio.situacao === 'ativo'
-                    ? 'selo selo-ativo'
-                    : 'selo selo-inativo'
-                }
-              >
-                {condominio.situacao === 'ativo' ? 'Ativo' : 'Inativo'}
-              </span>
-              <button
-                onClick={() => removerCondominio(condominio.id)}
-                className="botao-remover"
-                type="button"
-              >
-                Remover
-              </button>
-            </div>
+            <span
+              className={
+                condominio.situacao === 'ATIVO' ? 'selo selo-ativo' : 'selo selo-inativo'
+              }
+            >
+              {condominio.situacao === 'ATIVO' ? 'Ativo' : 'Inativo'}
+            </span>
           </li>
         ))}
       </ul>

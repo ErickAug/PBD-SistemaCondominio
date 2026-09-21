@@ -1,14 +1,14 @@
-function SeletorCondominio({ condominios, condominioAtivo, aoTrocar }) {
+function SeletorCondominio({ condominios, condominioAtivoId, aoTrocar }) {
   return (
     <label className="seletor-condominio">
       <span>Condomínio ativo</span>
       <select
-        value={condominioAtivo}
-        onChange={(evento) => aoTrocar(evento.target.value)}
+        value={condominioAtivoId}
+        onChange={(evento) => aoTrocar(Number(evento.target.value))}
       >
-        {condominios.map((nome) => (
-          <option key={nome} value={nome}>
-            {nome}
+        {condominios.map((condominio) => (
+          <option key={condominio.id} value={condominio.id}>
+            {condominio.nome}
           </option>
         ))}
       </select>
