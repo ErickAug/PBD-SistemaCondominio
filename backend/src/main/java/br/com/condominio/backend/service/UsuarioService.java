@@ -7,92 +7,74 @@ import br.com.condominio.backend.model.Unidade;
 import br.com.condominio.backend.model.Usuario;
 import br.com.condominio.backend.model.enums.Perfil;
 import br.com.condominio.backend.repository.AdministradoraRepository;
-import br.com.condominio.backend.repository.CondominioRepository;
 import br.com.condominio.backend.repository.UnidadeRepository;
 import br.com.condominio.backend.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Set;
+
 @Service
 public class UsuarioService {
 
+    private static final Set<Perfil> PERFIS_QUE_SINDICO_PODE_CRIAR = Set.of(Perfil.MORADOR, Perfil.PROPRIETARIO);
+
     private final UsuarioRepository usuarioRepository;
     private final AdministradoraRepository administradoraRepository;
-    private final CondominioRepository condominioRepository;
     private final UnidadeRepository unidadeRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository,
                           AdministradoraRepository administradoraRepository,
-                          CondominioRepository condominioRepository,
                           UnidadeRepository unidadeRepository,
                           PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.administradoraRepository = administradoraRepository;
-        this.condominioRepository = condominioRepository;
         this.unidadeRepository = unidadeRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Usuario cadastrar(Usuario usuario, Long condominioId, Long unidadeId, Long administradoraIdAutenticado) {
-        if (usuarioRepository.existsByUsuario(usuario.getUsuario())) {
-            throw new RegraDeNegocioException("Já existe um usuário cadastrado com este login.");
+    public Usuario cadastrarAdministrador(Usuario usuario, Long administradoraId) {
+        if (usuario.getPerfil() != Perfil.ADMINISTRADORA) {
+            throw new RegraDeNegocioException("Este endpoint só cria usuários com perfil ADMINISTRADORA.");
         }
 
-        vincularAoTenantCorreto(usuario, condominioId, unidadeId, administradoraIdAutenticado);
+        validarLoginDisponivel(usuario.getUsuario());
 
-        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
-
-        return usuarioRepository.save(usuario);
-    }
-
-    private void vincularAoTenantCorreto(Usuario usuario, Long condominioId, Long unidadeId,
-                                         Long administradoraIdAutenticado) {
-        Administradora administradora = administradoraRepository.findById(administradoraIdAutenticado)
+        Administradora administradora = administradoraRepository.findById(administradoraId)
                 .orElseThrow(() -> new RegraDeNegocioException("Administradora não encontrada."));
 
+        usuario.setAdministradora(administradora);
+        usuario.setCondominio(null);
+
+        return salvarComSenhaCifrada(usuario);
+    }
+
+    public Usuario cadastrarNoCondominio(Usuario usuario, Condominio condominioJaValidado, Perfil perfilDeQuemCadastra) {
         if (usuario.getPerfil() == Perfil.ADMINISTRADORA) {
-            if (unidadeId != null) {
-                throw new RegraDeNegocioException("Este perfil não aceita vínculo com unidade.");
-            }
-            usuario.setAdministradora(administradora);
-            usuario.setCondominio(null);
-            usuario.setUnidade(null);
-            return;
+            throw new RegraDeNegocioException("Este endpoint não aceita perfil ADMINISTRADORA.");
         }
 
-        if (condominioId == null) {
-            throw new RegraDeNegocioException("Este perfil exige um condomínio vinculado.");
+        if (perfilDeQuemCadastra == Perfil.SINDICO && !PERFIS_QUE_SINDICO_PODE_CRIAR.contains(usuario.getPerfil())) {
+            throw new RegraDeNegocioException("Síndico só pode cadastrar moradores e proprietários.");
         }
 
-        Condominio condominio = condominioRepository.findById(condominioId)
-                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
+        validarLoginDisponivel(usuario.getUsuario());
 
-        if (!condominio.getAdministradora().getId().equals(administradoraIdAutenticado)) {
-            throw new RegraDeNegocioException("Acesso negado a este condomínio.");
-        }
-
-        usuario.setCondominio(condominio);
+        usuario.setCondominio(condominioJaValidado);
         usuario.setAdministradora(null);
 
-        boolean perfilAceitaUnidade = usuario.getPerfil() == Perfil.MORADOR
-                || usuario.getPerfil() == Perfil.PROPRIETARIO;
+        return salvarComSenhaCifrada(usuario);
+    }
 
-        if (unidadeId != null) {
-            if (!perfilAceitaUnidade) {
-                throw new RegraDeNegocioException("Este perfil não aceita vínculo com unidade.");
-            }
-
-            Unidade unidade = unidadeRepository.findById(unidadeId)
-                    .orElseThrow(() -> new RegraDeNegocioException("Unidade não encontrada."));
-
-            if (!unidade.getBloco().getCondominio().getId().equals(condominioId)) {
-                throw new RegraDeNegocioException("Esta unidade não pertence ao condomínio informado.");
-            }
-
-            usuario.setUnidade(unidade);
-        } else {
-            usuario.setUnidade(null);
+    private void validarLoginDisponivel(String login) {
+        if (usuarioRepository.existsByUsuario(login)) {
+            throw new RegraDeNegocioException("Já existe um usuário cadastrado com este login.");
         }
+    }
+
+    private Usuario salvarComSenhaCifrada(Usuario usuario) {
+        usuario.setSenha(passwordEncoder.encode(usuario.getSenha()));
+        return usuarioRepository.save(usuario);
     }
 }

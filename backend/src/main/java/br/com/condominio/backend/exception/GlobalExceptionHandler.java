@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -25,6 +26,17 @@ public class GlobalExceptionHandler {
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> tratarAcessoNegado(AccessDeniedException excecao) {
+        Map<String, Object> corpo = Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.FORBIDDEN.value(),
+                "erro", "Você não tem permissão para executar esta ação."
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(corpo);
     }
 
     @ExceptionHandler(Exception.class)

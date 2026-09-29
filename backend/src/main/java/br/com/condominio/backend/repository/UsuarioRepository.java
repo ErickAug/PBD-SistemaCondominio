@@ -13,9 +13,4 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByUsuario(String usuario);
 
     Optional<Usuario> findByUsuario(String usuario);
-
-    boolean existsByUnidadeId(Long unidadeId);
-
-    @Query("SELECT DISTINCT u.unidade.id FROM Usuario u WHERE u.unidade.id IN :unidadeIds")
-    List<Long> buscarIdsDeUnidadesOcupadas(@Param("unidadeIds") List<Long> unidadeIds);
 }

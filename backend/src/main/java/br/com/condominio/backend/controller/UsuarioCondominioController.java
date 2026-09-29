@@ -1,8 +1,8 @@
 package br.com.condominio.backend.controller;
 
-import br.com.condominio.backend.dto.UsuarioRequestDTO;
+import br.com.condominio.backend.dto.UsuarioCondominioRequestDTO;
 import br.com.condominio.backend.dto.UsuarioResponseDTO;
-import br.com.condominio.backend.exception.RegraDeNegocioException;
+import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.model.Usuario;
 import br.com.condominio.backend.security.TenantAccessGuard;
 import br.com.condominio.backend.security.UsuarioDetailsImpl;
@@ -18,34 +18,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/administradoras/{administradoraId}/usuarios")
-public class UsuarioController {
+@RequestMapping("/condominios/{condominioId}/usuarios")
+public class UsuarioCondominioController {
 
     private final UsuarioService usuarioService;
-    private TenantAccessGuard tenantAccessGuard;
+    private final TenantAccessGuard tenantAccessGuard;
 
-    public UsuarioController(UsuarioService usuarioService, TenantAccessGuard tenantAccessGuard) {
+    public UsuarioCondominioController(UsuarioService usuarioService, TenantAccessGuard tenantAccessGuard) {
         this.usuarioService = usuarioService;
         this.tenantAccessGuard = tenantAccessGuard;
     }
 
-    private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
-        return new UsuarioResponseDTO(
-                usuario.getId(),
-                usuario.getNome(),
-                usuario.getUsuario(),
-                usuario.getPerfil(),
-                usuario.getAdministradora() != null ? usuario.getAdministradora().getId() : null,
-                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null
-        );
-    }
-
-    @PreAuthorize("hasRole('ADMINISTRADORA')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO')")
     @PostMapping
-    public ResponseEntity<UsuarioResponseDTO> cadastrar(@PathVariable Long administradoraId,
-                                                        @RequestBody UsuarioRequestDTO dto,
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(@PathVariable Long condominioId,
+                                                        @RequestBody UsuarioCondominioRequestDTO dto,
                                                         @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
-        Long administradoraIdAutenticado = tenantAccessGuard.validarAdministradora(administradoraId, usuarioAutenticado);
+        Condominio condominio = tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
 
         Usuario usuario = new Usuario();
         usuario.setNome(dto.nome());
@@ -53,9 +42,17 @@ public class UsuarioController {
         usuario.setSenha(dto.senha());
         usuario.setPerfil(dto.perfil());
 
-        Usuario salvo = usuarioService.cadastrarAdministrador(usuario, administradoraIdAutenticado);
+        Usuario salvo = usuarioService.cadastrarNoCondominio(
+                usuario, condominio, usuarioAutenticado.getUsuario().getPerfil());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
     }
 
+    private UsuarioResponseDTO toResponseDTO(Usuario usuario) {
+        return new UsuarioResponseDTO(
+                usuario.getId(), usuario.getNome(), usuario.getUsuario(), usuario.getPerfil(),
+                usuario.getAdministradora() != null ? usuario.getAdministradora().getId() : null,
+                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null
+        );
+    }
 }
