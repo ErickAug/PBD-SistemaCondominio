@@ -1,10 +1,7 @@
 package br.com.condominio.backend.model;
 
-import br.com.condominio.backend.model.enums.Perfil;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,38 +13,35 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Entity
-@Table(name = "usuarios")
+@Table(name = "autorizados_permanentes")
 @Getter
 @Setter
 @NoArgsConstructor
-public class Usuario {
+public class AutorizadoPermanente {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "unidade_id", nullable = false)
+    private Unidade unidade;
+
     @Column(nullable = false)
     private String nome;
 
-    @Column(nullable = false, unique = true)
-    private String usuario;
+    @Column(nullable = false)
+    private String documento;
 
     @Column(nullable = false)
-    private String senha;
+    private String tipo;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private Perfil perfil;
+    @Column(name = "data_inicio", nullable = false)
+    private LocalDate dataInicio;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "administradora_id", nullable = true)
-    private Administradora administradora;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "condominio_id", nullable = true)
-    private Condominio condominio;
-
-    @Column(nullable = true)
-    private String contato;
+    @Column(name = "data_fim", nullable = false)
+    private LocalDate dataFim;
 }

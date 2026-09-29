@@ -41,7 +41,7 @@ public class UsuarioCondominioController {
         usuario.setUsuario(dto.usuario());
         usuario.setSenha(dto.senha());
         usuario.setPerfil(dto.perfil());
-
+        usuario.setContato(dto.contato());
         Usuario salvo = usuarioService.cadastrarNoCondominio(
                 usuario, condominio, usuarioAutenticado.getUsuario().getPerfil());
 
@@ -52,7 +52,7 @@ public class UsuarioCondominioController {
         return new UsuarioResponseDTO(
                 usuario.getId(), usuario.getNome(), usuario.getUsuario(), usuario.getPerfil(),
                 usuario.getAdministradora() != null ? usuario.getAdministradora().getId() : null,
-                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null
+                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null, usuario.getContato()
         );
     }
 }

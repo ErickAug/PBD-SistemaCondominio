@@ -36,7 +36,8 @@ public class UsuarioController {
                 usuario.getUsuario(),
                 usuario.getPerfil(),
                 usuario.getAdministradora() != null ? usuario.getAdministradora().getId() : null,
-                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null
+                usuario.getCondominio() != null ? usuario.getCondominio().getId() : null,
+                usuario.getContato()
         );
     }
 

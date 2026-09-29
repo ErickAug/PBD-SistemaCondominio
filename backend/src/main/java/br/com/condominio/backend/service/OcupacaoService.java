@@ -4,6 +4,7 @@ import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Ocupacao;
 import br.com.condominio.backend.model.Unidade;
 import br.com.condominio.backend.model.Usuario;
+import br.com.condominio.backend.model.VinculoMorador;
 import br.com.condominio.backend.model.enums.Perfil;
 import br.com.condominio.backend.model.enums.TipoOcupacao;
 import br.com.condominio.backend.repository.OcupacaoRepository;
@@ -21,10 +22,15 @@ public class OcupacaoService {
 
     private final OcupacaoRepository ocupacaoRepository;
     private final UsuarioRepository usuarioRepository;
+    private final VinculoMoradorService vinculoMoradorService;
+    private final DependenteService dependenteService;
 
-    public OcupacaoService(OcupacaoRepository ocupacaoRepository, UsuarioRepository usuarioRepository) {
+    public OcupacaoService(OcupacaoRepository ocupacaoRepository, UsuarioRepository usuarioRepository,
+                           VinculoMoradorService vinculoMoradorService, DependenteService dependenteService) {
         this.ocupacaoRepository = ocupacaoRepository;
         this.usuarioRepository = usuarioRepository;
+        this.vinculoMoradorService = vinculoMoradorService;
+        this.dependenteService = dependenteService;
     }
 
     public Ocupacao registrar(Unidade unidade, TipoOcupacao tipo, Long ocupanteId, LocalDate dataEntrada) {
@@ -39,7 +45,16 @@ public class OcupacaoService {
         ocupacao.setOcupante(ocupante);
         ocupacao.setDataEntrada(dataEntrada);
 
-        return ocupacaoRepository.save(ocupacao);
+        ocupacao = ocupacaoRepository.save(ocupacao);
+
+        vinculoMoradorService.encerrarTodosAtivosDaUnidade(unidade.getId(), dataEntrada);
+        dependenteService.desativarTodosDaUnidade(unidade.getId());
+
+        if (tipo == TipoOcupacao.ALUGADA) {
+            vinculoMoradorService.registrar(unidade, ocupante.getId(), dataEntrada);
+        }
+
+        return ocupacao;
     }
 
     public Optional<Ocupacao> obterAtual(Long unidadeId) {
