@@ -1,5 +1,6 @@
 package br.com.condominio.backend.model;
 
+import br.com.condominio.backend.model.Usuario;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -45,4 +46,8 @@ public class Unidade {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bloco_id", nullable = false)
     private Bloco bloco;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "proprietario_id", nullable = true)
+    private Usuario proprietario;
 }
