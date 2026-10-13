@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { criarUsuarioNoCondominio } from '../services/api.js'
+import { useState, useEffect, useCallback } from 'react'
+import { criarUsuarioNoCondominio, listarUsuariosDoCondominio } from '../services/api.js'
 
 const PERFIS = [
   { valor: 'SINDICO', rotulo: 'Síndico' },
@@ -7,6 +7,10 @@ const PERFIS = [
   { valor: 'MORADOR', rotulo: 'Morador' },
   { valor: 'PROPRIETARIO', rotulo: 'Proprietário' },
 ]
+
+function rotuloDoPerfil(perfil) {
+  return PERFIS.find((p) => p.valor === perfil)?.rotulo ?? perfil
+}
 
 function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) {
   const perfisDisponiveis = perfisPermitidos
@@ -23,18 +27,34 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
   const [usuarios, setUsuarios] = useState([])
   const [form, setForm] = useState(formVazio)
   const [erro, setErro] = useState('')
+  const [erroLista, setErroLista] = useState('')
+  const [carregandoLista, setCarregandoLista] = useState(false)
   const [enviando, setEnviando] = useState(false)
 
   const condominioAtivo = condominios.find((c) => c.id === condominioAtivoId)
 
+  const carregarUsuarios = useCallback(async () => {
+    if (!condominioAtivoId) {
+      setUsuarios([])
+      return
+    }
+
+    setCarregandoLista(true)
+    setErroLista('')
+    try {
+      setUsuarios(await listarUsuariosDoCondominio(condominioAtivoId))
+    } catch (e) {
+      setErroLista(e.message)
+    } finally {
+      setCarregandoLista(false)
+    }
+  }, [condominioAtivoId])
+
   useEffect(() => {
     setForm(formVazio)
     setErro('')
-  }, [condominioAtivoId])
-
-  const usuariosDoCondominioAtivo = usuarios.filter(
-    (u) => u.condominioId === condominioAtivoId
-  )
+    carregarUsuarios()
+  }, [carregarUsuarios])
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target
@@ -55,10 +75,9 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
         perfil: form.perfil,
       })
 
-      setUsuarios((anterior) => [
-        ...anterior,
-        { ...usuarioCriado, condominioId: condominioAtivoId },
-      ])
+      setUsuarios((anterior) =>
+        [...anterior, usuarioCriado].sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'))
+      )
       setForm(formVazio)
     } catch (e) {
       setErro(e.message)
@@ -66,6 +85,10 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
       setEnviando(false)
     }
   }
+
+  let tituloLista = `${usuarios.length} usuário(s) cadastrado(s) em ${condominioAtivo?.nome ?? 'este condomínio'}`
+  if (carregandoLista) tituloLista = 'Carregando usuários...'
+  else if (usuarios.length === 0) tituloLista = 'Nenhum usuário cadastrado neste condomínio ainda'
 
   return (
     <section>
@@ -128,7 +151,7 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
             </select>
           </label>
 
-          {erro && <p className="erro-login">{erro}</p>}
+          {erro && <p className="alerta-erro">{erro}</p>}
 
           <button type="submit" className="botao-primario" disabled={enviando}>
             {enviando ? 'Salvando...' : 'Cadastrar usuário'}
@@ -136,22 +159,18 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
         </form>
       )}
 
-      <h3 className="lista-titulo">
-        {usuariosDoCondominioAtivo.length === 0
-          ? 'Nenhum usuário cadastrado nesta sessão'
-          : `${usuariosDoCondominioAtivo.length} usuário(s) cadastrado(s) nesta sessão`}
-      </h3>
+      <h3 className="lista-titulo">{tituloLista}</h3>
+
+      {erroLista && <p className="alerta-erro">{erroLista}</p>}
 
       <ul className="lista-condominios">
-        {usuariosDoCondominioAtivo.map((usuario) => (
+        {usuarios.map((usuario) => (
           <li key={usuario.id} className="item-condominio">
             <div>
               <strong>{usuario.nome}</strong>
-              <p>
-                @{usuario.usuario} ·{' '}
-                {PERFIS.find((p) => p.valor === usuario.perfil)?.rotulo}
-              </p>
+              <p>@{usuario.usuario}</p>
             </div>
+            <span className="selo selo-inativo">{rotuloDoPerfil(usuario.perfil)}</span>
           </li>
         ))}
       </ul>

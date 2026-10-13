@@ -87,8 +87,10 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
 
   const proprietarios = usuarios.filter((u) => u.perfil === 'PROPRIETARIO')
   const moradores = usuarios.filter((u) => u.perfil === 'MORADOR')
-  const opcoesOcupante =
-    formOcupacao.tipo === 'PROPRIETARIO_MORANDO' ? proprietarios : moradores
+  const ehProprietarioMorando = formOcupacao.tipo === 'PROPRIETARIO_MORANDO'
+  const opcoesOcupante = ehProprietarioMorando
+    ? proprietarios.filter((p) => p.id === unidade.proprietarioId)
+    : moradores
 
   const nomeProprietario = unidade.proprietarioId
     ? usuarios.find((u) => u.id === unidade.proprietarioId)?.nome ??
@@ -123,7 +125,11 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
     const { name, value } = evento.target
     setFormOcupacao((anterior) => {
       if (name === 'tipo') {
-        return { ...anterior, tipo: value, ocupanteId: '' }
+        const dono =
+          value === 'PROPRIETARIO_MORANDO' && unidade.proprietarioId
+            ? String(unidade.proprietarioId)
+            : ''
+        return { ...anterior, tipo: value, ocupanteId: dono }
       }
       return { ...anterior, [name]: value }
     })
@@ -133,6 +139,11 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
   async function registrar(evento) {
     evento.preventDefault()
     setErroOcupacao('')
+
+    if (ehProprietarioMorando && !unidade.proprietarioId) {
+      setErroOcupacao('Defina o proprietário da unidade antes de registrar "Proprietário morando".')
+      return
+    }
 
     const precisaOcupante = formOcupacao.tipo !== 'VAZIA'
     if (precisaOcupante && !formOcupacao.ocupanteId) {
@@ -266,7 +277,13 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
             </select>
           </label>
 
-          {formOcupacao.tipo !== 'VAZIA' && (
+          {ehProprietarioMorando && !unidade.proprietarioId && (
+            <p className="aviso-vazio">
+              Defina o proprietário da unidade antes de registrar essa ocupação.
+            </p>
+          )}
+
+          {formOcupacao.tipo !== 'VAZIA' && !(ehProprietarioMorando && !unidade.proprietarioId) && (
             <label className="campo">
               <span>
                 {formOcupacao.tipo === 'ALUGADA' ? 'Inquilino' : 'Proprietário morando'}
