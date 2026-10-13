@@ -10,7 +10,7 @@ import br.com.condominio.backend.model.enums.TipoOcupacao;
 import br.com.condominio.backend.repository.OcupacaoRepository;
 import br.com.condominio.backend.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -24,16 +24,26 @@ public class OcupacaoService {
     private final UsuarioRepository usuarioRepository;
     private final VinculoMoradorService vinculoMoradorService;
     private final DependenteService dependenteService;
+    private final VeiculoService veiculoService;
 
     public OcupacaoService(OcupacaoRepository ocupacaoRepository, UsuarioRepository usuarioRepository,
-                           VinculoMoradorService vinculoMoradorService, DependenteService dependenteService) {
+                           VinculoMoradorService vinculoMoradorService, DependenteService dependenteService, VeiculoService veiculoService) {
         this.ocupacaoRepository = ocupacaoRepository;
         this.usuarioRepository = usuarioRepository;
         this.vinculoMoradorService = vinculoMoradorService;
         this.dependenteService = dependenteService;
+        this.veiculoService = veiculoService;
     }
 
+    @Transactional
     public Ocupacao registrar(Unidade unidade, TipoOcupacao tipo, Long ocupanteId, LocalDate dataEntrada) {
+        if (tipo == null) {
+            throw new RegraDeNegocioException("O tipo da ocupação é obrigatório.");
+        }
+        if (dataEntrada == null) {
+            throw new RegraDeNegocioException("A data de entrada é obrigatória.");
+        }
+
         Usuario ocupante = resolverOcupante(ocupanteId);
 
         validarConsistenciaTipoOcupante(unidade, tipo, ocupante);
@@ -49,6 +59,7 @@ public class OcupacaoService {
 
         vinculoMoradorService.encerrarTodosAtivosDaUnidade(unidade.getId(), dataEntrada);
         dependenteService.desativarTodosDaUnidade(unidade.getId());
+        veiculoService.desativarTodosDaUnidade(unidade.getId());
 
         if (tipo == TipoOcupacao.ALUGADA) {
             vinculoMoradorService.registrar(unidade, ocupante.getId(), dataEntrada);

@@ -26,7 +26,7 @@ public class VinculoMoradorController {
         this.unidadeAccessGuard = unidadeAccessGuard;
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @PostMapping
     public ResponseEntity<VinculoMoradorResponseDTO> registrar(@PathVariable Long condominioId,
                                                                @PathVariable Long blocoId,
@@ -40,7 +40,7 @@ public class VinculoMoradorController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @PatchMapping("/{vinculoId}/encerrar")
     public ResponseEntity<Void> encerrar(@PathVariable Long condominioId,
                                          @PathVariable Long blocoId,
@@ -55,7 +55,7 @@ public class VinculoMoradorController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @GetMapping
     public ResponseEntity<List<VinculoMoradorResponseDTO>> listarAtivos(@PathVariable Long condominioId,
                                                                         @PathVariable Long blocoId,

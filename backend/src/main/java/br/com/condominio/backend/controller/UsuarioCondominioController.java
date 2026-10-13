@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.util.List;
 
 @RestController
 @RequestMapping("/condominios/{condominioId}/usuarios")
@@ -46,6 +48,19 @@ public class UsuarioCondominioController {
                 usuario, condominio, usuarioAutenticado.getUsuario().getPerfil());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
+    }
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO')")
+    @GetMapping
+    public ResponseEntity<List<UsuarioResponseDTO>> listar(@PathVariable Long condominioId,
+                                                           @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
+        tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
+
+        List<UsuarioResponseDTO> lista = usuarioService.listarDoCondominio(condominioId)
+                .stream()
+                .map(this::toResponseDTO)
+                .toList();
+
+        return ResponseEntity.ok(lista);
     }
 
     private UsuarioResponseDTO toResponseDTO(Usuario usuario) {

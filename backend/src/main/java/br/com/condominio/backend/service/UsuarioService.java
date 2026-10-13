@@ -3,6 +3,7 @@ package br.com.condominio.backend.service;
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Administradora;
 import br.com.condominio.backend.model.Condominio;
+import java.util.List;
 import br.com.condominio.backend.model.Unidade;
 import br.com.condominio.backend.model.Usuario;
 import br.com.condominio.backend.model.enums.Perfil;
@@ -65,6 +66,9 @@ public class UsuarioService {
         usuario.setAdministradora(null);
 
         return salvarComSenhaCifrada(usuario);
+    }
+    public List<Usuario> listarDoCondominio(Long condominioId) {
+        return usuarioRepository.findByCondominioIdOrderByNomeAsc(condominioId);
     }
 
     private void validarLoginDisponivel(String login) {

@@ -27,7 +27,7 @@ public class DependenteController {
         this.unidadeAccessGuard = unidadeAccessGuard;
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @PostMapping
     public ResponseEntity<DependenteResponseDTO> cadastrar(@PathVariable Long condominioId,
                                                            @PathVariable Long blocoId,
@@ -41,7 +41,7 @@ public class DependenteController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @PatchMapping("/{dependenteId}/desativar")
     public ResponseEntity<Void> desativar(@PathVariable Long condominioId,
                                           @PathVariable Long blocoId,
@@ -55,7 +55,7 @@ public class DependenteController {
         return ResponseEntity.noContent().build();
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'MORADOR', 'PROPRIETARIO')")
     @GetMapping
     public ResponseEntity<List<DependenteResponseDTO>> listarAtivos(@PathVariable Long condominioId,
                                                                     @PathVariable Long blocoId,

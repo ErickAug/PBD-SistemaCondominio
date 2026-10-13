@@ -8,6 +8,7 @@ import br.com.condominio.backend.model.enums.Perfil;
 import br.com.condominio.backend.repository.OcupacaoRepository;
 import br.com.condominio.backend.repository.UnidadeRepository;
 import br.com.condominio.backend.repository.UsuarioRepository;
+import br.com.condominio.backend.repository.VagaRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,11 +23,14 @@ public class UnidadeService {
     private final OcupacaoRepository ocupacaoRepository;
     private final UnidadeRepository unidadeRepository;
     private final UsuarioRepository usuarioRepository;
+    private final VagaRepository vagaRepository;
 
-    public UnidadeService(UnidadeRepository unidadeRepository, UsuarioRepository usuarioRepository, OcupacaoRepository ocupacaoRepository) {
+    public UnidadeService(UnidadeRepository unidadeRepository, UsuarioRepository usuarioRepository,
+                          OcupacaoRepository ocupacaoRepository, VagaRepository vagaRepository) {
         this.unidadeRepository = unidadeRepository;
         this.usuarioRepository = usuarioRepository;
         this.ocupacaoRepository = ocupacaoRepository;
+        this.vagaRepository = vagaRepository;
     }
 
     public Unidade cadastrar(Unidade unidade, Bloco blocoJaValidado) {
@@ -69,7 +73,9 @@ public class UnidadeService {
         if (ocupacaoRepository.existsByUnidadeId(unidadeJaValidada.getId())) {
             throw new RegraDeNegocioException("Não é possível excluir: existe histórico de ocupação vinculado a esta unidade.");
         }
-
+        if (vagaRepository.countByUnidadeId(unidadeJaValidada.getId()) > 0) {
+            throw new RegraDeNegocioException("Não é possível excluir: existem vagas vinculadas a esta unidade.");
+        }
         // TODO: quando a entidade Cobranca existir, checar tambem cobrancas vinculadas antes de excluir.
 
         unidadeRepository.deleteById(unidadeJaValidada.getId());
