@@ -7,6 +7,7 @@ import {
   excluirUnidade as apiExcluirUnidade,
   buscarStatusFracaoIdeal,
 } from '../services/api.js'
+import DetalheUnidade from './DetalheUnidade.jsx'
 
 const FORM_UNIDADE_VAZIO = {
   blocoId: '',
@@ -26,30 +27,34 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
   const [nomeBloco, setNomeBloco] = useState('')
   const [formUnidade, setFormUnidade] = useState(FORM_UNIDADE_VAZIO)
   const [erroUnidade, setErroUnidade] = useState('')
-  const [mensagemExclusao, setMensagemExclusao] = useState('')
+  const [erroExclusao, setErroExclusao] = useState(null)
   const [enviando, setEnviando] = useState(false)
+  const [unidadeAbertaId, setUnidadeAbertaId] = useState(null)
 
-  const carregarTudo = useCallback(async () => {
-    setCarregando(true)
-    setErroCarregamento('')
-    try {
-      const [listaBlocos, status] = await Promise.all([
-        apiListarBlocos(condominioId),
-        buscarStatusFracaoIdeal(condominioId),
-      ])
-      setBlocos(listaBlocos)
-      setStatusFracao(status)
+  const carregarTudo = useCallback(
+    async (silencioso = false) => {
+      if (!silencioso) setCarregando(true)
+      setErroCarregamento('')
+      try {
+        const [listaBlocos, status] = await Promise.all([
+          apiListarBlocos(condominioId),
+          buscarStatusFracaoIdeal(condominioId),
+        ])
+        setBlocos(listaBlocos)
+        setStatusFracao(status)
 
-      const listasPorBloco = await Promise.all(
-        listaBlocos.map((bloco) => apiListarUnidades(condominioId, bloco.id))
-      )
-      setUnidades(listasPorBloco.flat())
-    } catch (erro) {
-      setErroCarregamento(erro.message)
-    } finally {
-      setCarregando(false)
-    }
-  }, [condominioId])
+        const listasPorBloco = await Promise.all(
+          listaBlocos.map((bloco) => apiListarUnidades(condominioId, bloco.id))
+        )
+        setUnidades(listasPorBloco.flat())
+      } catch (erro) {
+        setErroCarregamento(erro.message)
+      } finally {
+        setCarregando(false)
+      }
+    },
+    [condominioId]
+  )
 
   useEffect(() => {
     carregarTudo()
@@ -63,7 +68,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
     try {
       await apiCadastrarBloco(condominioId, nomeBloco.trim())
       setNomeBloco('')
-      await carregarTudo() 
+      await carregarTudo(true)
     } catch (erro) {
       setErroCarregamento(erro.message)
     } finally {
@@ -96,7 +101,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
         fracaoIdeal: fracao,
       })
       setFormUnidade({ ...FORM_UNIDADE_VAZIO, blocoId: formUnidade.blocoId })
-      await carregarTudo() 
+      await carregarTudo(true)
     } catch (erro) {
       setErroUnidade(erro.message)
     } finally {
@@ -105,12 +110,13 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
   }
 
   async function tentarExcluirUnidade(unidade) {
-    setMensagemExclusao('')
+    setErroExclusao(null)
     try {
       await apiExcluirUnidade(condominioId, unidade.blocoId, unidade.id)
-      await carregarTudo()
+      if (unidadeAbertaId === unidade.id) setUnidadeAbertaId(null)
+      await carregarTudo(true)
     } catch (erro) {
-      setMensagemExclusao(erro.message)
+      setErroExclusao({ unidadeId: unidade.id, mensagem: erro.message })
     }
   }
 
@@ -136,7 +142,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
         condomínio.
       </p>
 
-      {erroCarregamento && <p className="erro-login">{erroCarregamento}</p>}
+      {erroCarregamento && <p className="alerta-erro">{erroCarregamento}</p>}
 
       {statusFracao && (
         <div className={statusFracao.fechaEm100 ? 'painel-fracao ok' : 'painel-fracao alerta'}>
@@ -252,7 +258,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
             </label>
           </div>
 
-          {erroUnidade && <p className="erro-login">{erroUnidade}</p>}
+          {erroUnidade && <p className="alerta-erro">{erroUnidade}</p>}
 
           <button type="submit" className="botao-primario" disabled={enviando}>
             {enviando ? 'Salvando...' : 'Adicionar unidade'}
@@ -266,32 +272,54 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
           : `${unidades.length} unidade(s) cadastrada(s)`}
       </h3>
 
-      {mensagemExclusao && <p className="erro-login">{mensagemExclusao}</p>}
-
       <ul className="lista-condominios">
         {unidades.map((unidade) => (
-          <li key={unidade.id} className="item-condominio">
-            <div>
-              <strong>
-                {nomeDoBloco(unidade.blocoId)} · unidade {unidade.numero}
-              </strong>
-              <p>
-                {unidade.andar}º andar · {unidade.area} m² · fração{' '}
-                {Number(unidade.fracaoIdeal).toFixed(2)}%
-              </p>
+          <li key={unidade.id} className="item-unidade">
+            <div className="item-condominio">
+              <div>
+                <strong>
+                  {nomeDoBloco(unidade.blocoId)} · unidade {unidade.numero}
+                </strong>
+                <p>
+                  {unidade.andar}º andar · {unidade.area} m² · fração{' '}
+                  {Number(unidade.fracaoIdeal).toFixed(2)}%
+                </p>
+              </div>
+              <div className="item-condominio-acoes">
+                <span className={unidade.ocupada ? 'selo selo-inativo' : 'selo selo-ativo'}>
+                  {unidade.ocupada ? 'Ocupada' : 'Vaga'}
+                </span>
+                <button
+                  onClick={() =>
+                    setUnidadeAbertaId(unidadeAbertaId === unidade.id ? null : unidade.id)
+                  }
+                  className="botao-detalhes"
+                  type="button"
+                >
+                  {unidadeAbertaId === unidade.id ? 'Fechar' : 'Detalhes'}
+                </button>
+                <button
+                  onClick={() => tentarExcluirUnidade(unidade)}
+                  className="botao-remover"
+                  type="button"
+                >
+                  Excluir
+                </button>
+              </div>
             </div>
-            <div className="item-condominio-acoes">
-              <span className={unidade.ocupada ? 'selo selo-inativo' : 'selo selo-ativo'}>
-                {unidade.ocupada ? 'Ocupada' : 'Vaga'}
-              </span>
-              <button
-                onClick={() => tentarExcluirUnidade(unidade)}
-                className="botao-remover"
-                type="button"
-              >
-                Excluir
-              </button>
-            </div>
+
+            {erroExclusao?.unidadeId === unidade.id && (
+              <p className="alerta-erro">{erroExclusao.mensagem}</p>
+            )}
+
+            {unidadeAbertaId === unidade.id && (
+              <DetalheUnidade
+                condominioId={condominioId}
+                unidade={unidade}
+                nomeBloco={nomeDoBloco(unidade.blocoId)}
+                aoAtualizar={() => carregarTudo(true)}
+              />
+            )}
           </li>
         ))}
       </ul>

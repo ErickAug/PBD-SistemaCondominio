@@ -276,3 +276,137 @@ h2 {
   color: var(--cor-texto);
   background: var(--cor-painel);
 }
+
+.item-unidade {
+  list-style: none;
+}
+
+.botao-detalhes {
+  background: transparent;
+  border: 1px solid var(--cor-primaria);
+  color: var(--cor-primaria);
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.botao-detalhes:hover {
+  background: var(--cor-primaria);
+  color: #FFFFFF;
+}
+
+.painel-unidade {
+  background: var(--cor-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  padding: 20px;
+  margin: 4px 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.secao-unidade h4 {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.descricao-curta {
+  font-size: 13px;
+  color: var(--cor-texto-suave);
+  margin: 0 0 12px;
+}
+
+.papeis {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.papel {
+  display: flex;
+  gap: 12px;
+}
+
+.papel-rotulo {
+  min-width: 210px;
+  color: var(--cor-texto-suave);
+}
+
+.formulario-inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.formulario-inline .botao-primario {
+  align-self: flex-end;
+  box-sizing: border-box;
+  height: 40px;
+  margin-top: 0;
+}
+
+.painel-unidade select,
+.painel-unidade input[type="date"] {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--cor-texto);
+  background: var(--cor-painel);
+}
+
+.linha-do-tempo {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 16px;
+  border-left: 2px solid var(--cor-borda);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.item-tempo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.item-tempo.atual strong {
+  color: var(--cor-primaria);
+}
+
+.periodo {
+  color: var(--cor-texto-suave);
+}
+
+.resultado-consulta {
+  margin: 12px 0 0;
+  font-size: 14px;
+}
+
+.alerta-erro {
+  margin: 12px 0 0;
+  padding: 10px 14px;
+  border: 1px solid var(--cor-erro);
+  border-radius: 4px;
+  background: rgba(179, 67, 43, 0.08);
+  color: var(--cor-erro);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.formulario .alerta-erro {
+  margin: 0;
+}
+
+.item-unidade>.alerta-erro {
+  margin: 10px 0 14px;
+}

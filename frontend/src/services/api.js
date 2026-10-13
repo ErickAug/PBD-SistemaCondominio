@@ -2,7 +2,6 @@ const API_URL = import.meta.env.VITE_API_URL
 
 const CHAVE_TOKEN = 'token'
 
-
 export function salvarToken(token) {
   localStorage.setItem(CHAVE_TOKEN, token)
 }
@@ -21,6 +20,21 @@ function headersAutenticados() {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   }
+}
+
+async function lancarErroComMensagem(resposta, mensagemPadrao) {
+  let mensagem = mensagemPadrao
+  try {
+    const corpo = await resposta.json()
+    mensagem = corpo?.erro || corpo?.mensagem || mensagemPadrao
+  } catch {
+    mensagem = mensagemPadrao
+  }
+  throw new Error(mensagem)
+}
+
+function urlUnidade(condominioId, blocoId, unidadeId) {
+  return `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}`
 }
 
 export async function login(usuario, senha) {
@@ -51,20 +65,6 @@ export function logout() {
   removerToken()
 }
 
-export async function buscarUsuarioLogado() {
-  const resposta = await fetch(`${API_URL}/auth/me`, {
-    headers: headersAutenticados(),
-  })
-
-  if (!resposta.ok) {
-    throw new Error(
-      'Não foi possível carregar os dados do usuário logado (endpoint ainda não existe no backend?).'
-    )
-  }
-
-  return resposta.json()
-}
-
 export async function buscarCondominios(administradoraId) {
   const resposta = await fetch(`${API_URL}/administradoras/${administradoraId}/condominios`, {
     headers: headersAutenticados(),
@@ -75,7 +75,7 @@ export async function buscarCondominios(administradoraId) {
   }
 
   if (!resposta.ok) {
-    throw new Error('Não foi possível carregar os condomínios.')
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os condomínios.')
   }
 
   return resposta.json()
@@ -89,39 +89,24 @@ export async function criarCondominio(administradoraId, dadosCondominio) {
   })
 
   if (!resposta.ok) {
-    throw new Error('Não foi possível salvar o condomínio.')
+    await lancarErroComMensagem(resposta, 'Não foi possível salvar o condomínio.')
   }
 
   return resposta.json()
 }
 
-export async function criarUsuario(administradoraId, dadosUsuario) {
-  const resposta = await fetch(`${API_URL}/administradoras/${administradoraId}/usuarios`, {
+export async function criarUsuarioNoCondominio(condominioId, dadosUsuario) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/usuarios`, {
     method: 'POST',
     headers: headersAutenticados(),
     body: JSON.stringify(dadosUsuario),
   })
-
-  if (resposta.status === 409) {
-    throw new Error('Esse nome de usuário já está cadastrado. Escolha outro.')
-  }
 
   if (!resposta.ok) {
     await lancarErroComMensagem(resposta, 'Não foi possível cadastrar o usuário.')
   }
 
   return resposta.json()
-}
-
-
-async function lancarErroComMensagem(resposta, mensagemPadrao) {
-  let mensagem = mensagemPadrao
-  try {
-    const corpo = await resposta.json()
-    if (corpo?.mensagem) mensagem = corpo.mensagem
-  } catch {
-  }
-  throw new Error(mensagem)
 }
 
 export async function cadastrarBloco(condominioId, nome) {
@@ -156,7 +141,7 @@ export async function cadastrarUnidade(condominioId, blocoId, dados) {
     {
       method: 'POST',
       headers: headersAutenticados(),
-      body: JSON.stringify(dados), 
+      body: JSON.stringify(dados),
     }
   )
 
@@ -184,18 +169,15 @@ export async function listarUnidades(condominioId, blocoId) {
 }
 
 export async function excluirUnidade(condominioId, blocoId, unidadeId) {
-  const resposta = await fetch(
-    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}`,
-    {
-      method: 'DELETE',
-      headers: headersAutenticados(),
-    }
-  )
+  const resposta = await fetch(urlUnidade(condominioId, blocoId, unidadeId), {
+    method: 'DELETE',
+    headers: headersAutenticados(),
+  })
 
   if (!resposta.ok) {
     await lancarErroComMensagem(
       resposta,
-      'Não foi possível excluir: a unidade provavelmente está ocupada (tem morador vinculado).'
+      'Não foi possível excluir: a unidade provavelmente está ocupada.'
     )
   }
 }
@@ -207,6 +189,87 @@ export async function buscarStatusFracaoIdeal(condominioId) {
 
   if (!resposta.ok) {
     await lancarErroComMensagem(resposta, 'Não foi possível carregar o status da fração ideal.')
+  }
+
+  return resposta.json()
+}
+
+export async function atribuirProprietario(condominioId, blocoId, unidadeId, proprietarioId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/proprietario`, {
+    method: 'PATCH',
+    headers: headersAutenticados(),
+    body: JSON.stringify({ proprietarioId }),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível atribuir o proprietário.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarOcupacao(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/ocupacoes`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a ocupação.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarOcupacaoAtual(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/ocupacoes/atual`, {
+    headers: headersAutenticados(),
+  })
+
+  if (resposta.status === 204) return null
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar a ocupação atual.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarOcupacaoEmData(condominioId, blocoId, unidadeId, data) {
+  const resposta = await fetch(
+    `${urlUnidade(condominioId, blocoId, unidadeId)}/ocupacoes/em-data?data=${encodeURIComponent(data)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (resposta.status === 204) return null
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível consultar a ocupação nessa data.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarOcupacoes(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/ocupacoes`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o histórico de ocupações.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarUsuariosDoCondominio(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/usuarios`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os usuários do condomínio.')
   }
 
   return resposta.json()

@@ -18,6 +18,7 @@ function App() {
   const [erroCondominios, setErroCondominios] = useState('')
 
   const ehAdministradora = usuarioLogado?.perfil === 'administradora'
+  const ehSindico = usuarioLogado?.perfil === 'sindico'
 
   useEffect(() => {
     if (!usuarioLogado || !ehAdministradora) return
@@ -34,6 +35,7 @@ function App() {
 
   function aoFazerLogin(usuario) {
     setUsuarioLogado(usuario)
+    setTelaAtual(usuario.perfil === 'sindico' ? 'unidades' : 'administradora')
   }
 
   function sair() {
@@ -49,6 +51,7 @@ function App() {
   }
 
   const condominioAtivo = condominios.find((c) => c.id === condominioAtivoId)
+  const condominiosDoSindico = [{ id: usuarioLogado.condominioId, nome: 'Meu condomínio' }]
 
   return (
     <div className="layout">
@@ -87,6 +90,23 @@ function App() {
           </nav>
         )}
 
+        {ehSindico && (
+          <nav className="sidebar-nav">
+            <button
+              className={telaAtual === 'unidades' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('unidades')}
+            >
+              Blocos e unidades
+            </button>
+            <button
+              className={telaAtual === 'usuarios' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('usuarios')}
+            >
+              Usuários
+            </button>
+          </nav>
+        )}
+
         <button className="nav-item nav-sair" onClick={sair}>
           Sair
         </button>
@@ -106,17 +126,27 @@ function App() {
             )}
             {telaAtual === 'usuarios' && (
               <CadastroUsuarios
-                administradoraId={usuarioLogado.administradoraId}
                 condominios={condominios}
                 condominioAtivoId={condominioAtivoId}
               />
             )}
           </>
-        ) : usuarioLogado.perfil === 'sindico' ? (
-          <BlocosUnidades
-            nomeCondominio={condominioAtivo?.nome ?? 'Meu condomínio'}
-            condominioId={usuarioLogado.condominioId}
-          />
+        ) : ehSindico ? (
+          <>
+            {telaAtual === 'unidades' && (
+              <BlocosUnidades
+                nomeCondominio={condominioAtivo?.nome ?? 'Meu condomínio'}
+                condominioId={usuarioLogado.condominioId}
+              />
+            )}
+            {telaAtual === 'usuarios' && (
+              <CadastroUsuarios
+                condominios={condominiosDoSindico}
+                condominioAtivoId={usuarioLogado.condominioId}
+                perfisPermitidos={['MORADOR', 'PROPRIETARIO']}
+              />
+            )}
+          </>
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />
         )}
