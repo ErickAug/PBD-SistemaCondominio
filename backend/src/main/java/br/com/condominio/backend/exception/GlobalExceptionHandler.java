@@ -2,10 +2,13 @@ package br.com.condominio.backend.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -69,6 +72,31 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "status", HttpStatus.BAD_REQUEST.value(),
                 "erro", "Corpo da requisição inválido ou mal formatado."
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<Map<String, Object>> tratarConflitoDeDados(DataIntegrityViolationException excecao) {
+        logger.warn("Violação de integridade de dados", excecao);
+
+        Map<String, Object> corpo = Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.CONFLICT.value(),
+                "erro", "A operação conflita com dados já existentes ou em uso."
+        );
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+
+    @ExceptionHandler({MissingServletRequestParameterException.class, MethodArgumentTypeMismatchException.class})
+    public ResponseEntity<Map<String, Object>> tratarParametroInvalido(Exception excecao) {
+        Map<String, Object> corpo = Map.of(
+                "timestamp", LocalDateTime.now(),
+                "status", HttpStatus.BAD_REQUEST.value(),
+                "erro", "Parâmetro da requisição ausente ou inválido."
         );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);

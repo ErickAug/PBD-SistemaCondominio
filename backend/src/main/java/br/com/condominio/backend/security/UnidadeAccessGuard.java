@@ -2,7 +2,6 @@ package br.com.condominio.backend.security;
 
 import br.com.condominio.backend.model.Unidade;
 import br.com.condominio.backend.model.Usuario;
-import br.com.condominio.backend.model.enums.Perfil;
 import br.com.condominio.backend.service.BlocoService;
 import br.com.condominio.backend.service.UnidadeService;
 import org.springframework.stereotype.Component;
@@ -25,13 +24,14 @@ public class UnidadeAccessGuard {
         this.unidadeService = unidadeService;
     }
 
-    public Unidade validarAcesso(Long condominioId, Long blocoId, Long unidadeId, UsuarioDetailsImpl usuarioAutenticado) {
+    public Unidade validarAcesso(Long condominioId, Long blocoId, Long unidadeId,
+                                 UsuarioDetailsImpl usuarioAutenticado) {
         Usuario usuario = usuarioAutenticado.getUsuario();
 
-        if (usuario.getPerfil() == Perfil.MORADOR) {
-            moradorUnidadeGuard.validarAcessoDoMorador(unidadeId, usuario);
-        } else {
-            tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
+        switch (usuario.getPerfil()) {
+            case MORADOR -> moradorUnidadeGuard.validarAcessoDoMorador(unidadeId, usuario);
+            case PROPRIETARIO -> moradorUnidadeGuard.validarAcessoDoProprietarioMorando(unidadeId, usuario);
+            default -> tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
         }
 
         blocoService.buscarValidandoCondominio(blocoId, condominioId);
