@@ -30,22 +30,46 @@ public class TenantAccessGuard {
 
     public Condominio validarAcessoGerencialAoCondominio(Long condominioId, UsuarioDetailsImpl usuarioAutenticado) {
         Usuario usuario = usuarioAutenticado.getUsuario();
+        Condominio condominio = buscarCondominio(condominioId);
 
-        Condominio condominio = condominioRepository.findById(condominioId)
-                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
+        boolean permitido = ehAdministradoraDona(usuario, condominio)
+                || (usuario.getPerfil() == Perfil.SINDICO && pertenceAoCondominio(usuario, condominioId));
 
-        boolean administradoraDona = usuario.getPerfil() == Perfil.ADMINISTRADORA
-                && usuario.getAdministradora() != null
-                && usuario.getAdministradora().getId().equals(condominio.getAdministradora().getId());
-
-        boolean sindicoDoCondominio = usuario.getPerfil() == Perfil.SINDICO
-                && usuario.getCondominio() != null
-                && usuario.getCondominio().getId().equals(condominioId);
-
-        if (!administradoraDona && !sindicoDoCondominio) {
+        if (!permitido) {
             throw new RegraDeNegocioException("Acesso negado a este condomínio.");
         }
 
         return condominio;
+    }
+
+    public Condominio validarAcessoLeituraAoCondominio(Long condominioId, UsuarioDetailsImpl usuarioAutenticado) {
+        Usuario usuario = usuarioAutenticado.getUsuario();
+        Condominio condominio = buscarCondominio(condominioId);
+
+        boolean funcionarioDoCondominio = (usuario.getPerfil() == Perfil.SINDICO
+                || usuario.getPerfil() == Perfil.PORTARIA)
+                && pertenceAoCondominio(usuario, condominioId);
+
+        if (!ehAdministradoraDona(usuario, condominio) && !funcionarioDoCondominio) {
+            throw new RegraDeNegocioException("Acesso negado a este condomínio.");
+        }
+
+        return condominio;
+    }
+
+    private Condominio buscarCondominio(Long condominioId) {
+        return condominioRepository.findById(condominioId)
+                .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
+    }
+
+    private boolean ehAdministradoraDona(Usuario usuario, Condominio condominio) {
+        return usuario.getPerfil() == Perfil.ADMINISTRADORA
+                && usuario.getAdministradora() != null
+                && usuario.getAdministradora().getId().equals(condominio.getAdministradora().getId());
+    }
+
+    private boolean pertenceAoCondominio(Usuario usuario, Long condominioId) {
+        return usuario.getCondominio() != null
+                && usuario.getCondominio().getId().equals(condominioId);
     }
 }
