@@ -16,6 +16,8 @@ public interface UnidadeRepository extends JpaRepository<Unidade, Long> {
 
     List<Unidade> findByBlocoCondominioId(Long condominioId);
 
+    List<Unidade> findByProprietarioId(Long proprietarioId);
+
     @Query("""
             SELECT COALESCE(SUM(u.fracaoIdeal), 0)
             FROM Unidade u
