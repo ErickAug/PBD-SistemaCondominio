@@ -22,6 +22,7 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
     usuario: '',
     senha: '',
     perfil: perfisDisponiveis[0].valor,
+    contato: '',
   }
 
   const [usuarios, setUsuarios] = useState([])
@@ -73,6 +74,7 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
         usuario: form.usuario,
         senha: form.senha,
         perfil: form.perfil,
+        contato: form.contato.trim() || null,
       })
 
       setUsuarios((anterior) =>
@@ -141,6 +143,16 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
           </label>
 
           <label className="campo">
+            <span>Contato (opcional)</span>
+            <input
+              name="contato"
+              value={form.contato}
+              onChange={atualizarCampo}
+              placeholder="Telefone ou e-mail"
+            />
+          </label>
+
+          <label className="campo">
             <span>Perfil</span>
             <select name="perfil" value={form.perfil} onChange={atualizarCampo}>
               {perfisDisponiveis.map((p) => (
@@ -168,7 +180,10 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
           <li key={usuario.id} className="item-condominio">
             <div>
               <strong>{usuario.nome}</strong>
-              <p>@{usuario.usuario}</p>
+              <p>
+                @{usuario.usuario}
+                {usuario.contato ? ` · ${usuario.contato}` : ''}
+              </p>
             </div>
             <span className="selo selo-inativo">{rotuloDoPerfil(usuario.perfil)}</span>
           </li>
