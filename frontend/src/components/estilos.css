@@ -410,3 +410,84 @@ h2 {
 .item-unidade>.alerta-erro {
   margin: 10px 0 14px;
 }
+
+.listas-unidade {
+  display: flex;
+  flex-direction: column;
+}
+
+.abas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 16px;
+}
+
+.aba {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: var(--cor-texto-suave);
+  cursor: pointer;
+}
+
+.aba:hover {
+  color: var(--cor-texto);
+}
+
+.aba.ativa {
+  color: var(--cor-primaria);
+  border-bottom-color: var(--cor-primaria);
+  font-weight: 500;
+}
+
+.subtitulo-lista {
+  margin: 20px 0 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--cor-texto-suave);
+}
+
+.listas-unidade select,
+.listas-unidade input[type="date"],
+.listas-unidade .campo input {
+  box-sizing: border-box;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  font-size: 14px;
+  color: var(--cor-texto);
+  background: var(--cor-painel);
+}
+
+.formulario-inline .botao-secundario {
+  align-self: flex-end;
+  box-sizing: border-box;
+  height: 40px;
+}
+
+.linha-encerrar {
+  padding: 12px 0;
+}
+
+.selo-vencido {
+  color: var(--cor-erro);
+  border-color: var(--cor-erro);
+}
+
+.opcao-marcavel {
+  display: flex;
+  align-items: center;
+  flex-basis: 100%;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--cor-texto);
+}
+
+.listas-unidade .aviso-vazio {
+  margin-bottom: 12px;
+}

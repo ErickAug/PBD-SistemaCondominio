@@ -7,6 +7,7 @@ import {
   listarOcupacoes,
   listarUsuariosDoCondominio,
 } from '../services/api.js'
+import ListasDaUnidade from './ListasDaUnidade.jsx'
 
 const TIPOS_OCUPACAO = [
   { valor: 'PROPRIETARIO_MORANDO', rotulo: 'Proprietário morando' },
@@ -48,6 +49,7 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
   })
   const [dataConsulta, setDataConsulta] = useState('')
   const [resultadoConsulta, setResultadoConsulta] = useState(undefined)
+  const [versaoOcupacao, setVersaoOcupacao] = useState(0)
 
   const carregar = useCallback(async () => {
     try {
@@ -160,12 +162,23 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
       })
       setFormOcupacao((anterior) => ({ ...anterior, ocupanteId: '' }))
       await carregar()
+      setVersaoOcupacao((v) => v + 1)
       await aoAtualizar()
     } catch (e) {
       setErroOcupacao(e.message)
     } finally {
       setSalvando(false)
     }
+  }
+
+  async function registrarSaidaDoInquilino(dataSaida) {
+    await registrarOcupacao(condominioId, unidade.blocoId, unidade.id, {
+      tipo: 'VAZIA',
+      ocupanteId: null,
+      dataEntrada: dataSaida,
+    })
+    await carregar()
+    await aoAtualizar()
   }
 
   async function consultar(evento) {
@@ -375,6 +388,19 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
             {resultadoConsulta.ocupanteNome ? ` — ${resultadoConsulta.ocupanteNome}` : ''}
           </p>
         )}
+      </div>
+
+      <div className="secao-unidade">
+        <h4>Quem mora e quem entra</h4>
+        <ListasDaUnidade
+          condominioId={condominioId}
+          blocoId={unidade.blocoId}
+          unidadeId={unidade.id}
+          usuarios={usuarios}
+          versao={versaoOcupacao}
+          ocupacaoAtual={ocupacaoAtual}
+          aoSairOcupante={registrarSaidaDoInquilino}
+        />
       </div>
     </div>
   )

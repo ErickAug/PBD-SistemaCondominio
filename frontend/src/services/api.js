@@ -48,7 +48,8 @@ export async function login(usuario, senha) {
     throw new Error('Usuário ou senha inválidos.')
   }
 
-  const { token, usuarioId, nome, perfil, administradoraId, condominioId } = await resposta.json()
+  const { token, usuarioId, nome, perfil, administradoraId, condominioId, blocoId, unidadeId } =
+    await resposta.json()
   salvarToken(token)
 
   return {
@@ -58,6 +59,8 @@ export async function login(usuario, senha) {
     perfil: perfil.toLowerCase(),
     administradoraId,
     condominioId,
+    blocoId,
+    unidadeId,
   }
 }
 
@@ -270,6 +273,113 @@ export async function listarUsuariosDoCondominio(condominioId) {
 
   if (!resposta.ok) {
     await lancarErroComMensagem(resposta, 'Não foi possível carregar os usuários do condomínio.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarMoradores(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/moradores`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os moradores.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarMorador(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/moradores`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar o morador.')
+  }
+
+  return resposta.json()
+}
+
+export async function encerrarVinculoMorador(condominioId, blocoId, unidadeId, vinculoId, dataSaida) {
+  const resposta = await fetch(
+    `${urlUnidade(condominioId, blocoId, unidadeId)}/moradores/${vinculoId}/encerrar`,
+    {
+      method: 'PATCH',
+      headers: headersAutenticados(),
+      body: JSON.stringify({ dataSaida }),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível encerrar o vínculo do morador.')
+  }
+}
+
+export async function listarDependentes(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/dependentes`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os dependentes.')
+  }
+
+  return resposta.json()
+}
+
+export async function cadastrarDependente(condominioId, blocoId, unidadeId, nome) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/dependentes`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify({ nome }),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar o dependente.')
+  }
+
+  return resposta.json()
+}
+
+export async function desativarDependente(condominioId, blocoId, unidadeId, dependenteId) {
+  const resposta = await fetch(
+    `${urlUnidade(condominioId, blocoId, unidadeId)}/dependentes/${dependenteId}/desativar`,
+    {
+      method: 'PATCH',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível desativar o dependente.')
+  }
+}
+
+export async function listarAutorizados(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/autorizados`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os autorizados.')
+  }
+
+  return resposta.json()
+}
+
+export async function cadastrarAutorizado(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/autorizados`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar o autorizado.')
   }
 
   return resposta.json()

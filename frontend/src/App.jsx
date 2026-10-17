@@ -5,6 +5,7 @@ import CadastroCondominios from './components/CadastroCondominios.jsx'
 import CadastroUsuarios from './components/CadastroUsuarios.jsx'
 import AreaPerfil from './components/AreaPerfil.jsx'
 import BlocosUnidades from './components/BlocosUnidades.jsx'
+import MinhaUnidade from './components/MinhaUnidade.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
 import './App.css'
@@ -147,6 +148,8 @@ function App() {
               />
             )}
           </>
+        ) : usuarioLogado.perfil === 'morador' ? (
+          <MinhaUnidade usuarioLogado={usuarioLogado} />
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />
         )}
