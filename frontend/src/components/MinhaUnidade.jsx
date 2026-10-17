@@ -1,11 +1,16 @@
 import ListasDaUnidade from './ListasDaUnidade.jsx'
 
 function MinhaUnidade({ usuarioLogado }) {
-  const { condominioId, blocoId, unidadeId } = usuarioLogado
+  const { condominioId, blocoId, blocoNome, unidadeId, unidadeNumero } = usuarioLogado
+
+  const titulo =
+    blocoNome && unidadeNumero
+      ? `Minha unidade: ${blocoNome}, unidade ${unidadeNumero}`
+      : 'Minha unidade'
 
   return (
     <section>
-      <h2>Minha unidade</h2>
+      <h2>{titulo}</h2>
       <p className="descricao">
         Aqui você cadastra quem mora com você, os dependentes e quem pode
         entrar sempre, sem precisar autorizar a cada visita.

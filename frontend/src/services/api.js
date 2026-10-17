@@ -48,8 +48,18 @@ export async function login(usuario, senha) {
     throw new Error('Usuário ou senha inválidos.')
   }
 
-  const { token, usuarioId, nome, perfil, administradoraId, condominioId, blocoId, unidadeId } =
-    await resposta.json()
+  const {
+    token,
+    usuarioId,
+    nome,
+    perfil,
+    administradoraId,
+    condominioId,
+    blocoId,
+    blocoNome,
+    unidadeId,
+    unidadeNumero,
+  } = await resposta.json()
   salvarToken(token)
 
   return {
@@ -60,7 +70,9 @@ export async function login(usuario, senha) {
     administradoraId,
     condominioId,
     blocoId,
+    blocoNome,
     unidadeId,
+    unidadeNumero,
   }
 }
 
