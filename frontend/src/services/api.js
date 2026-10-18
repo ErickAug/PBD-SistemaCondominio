@@ -396,3 +396,95 @@ export async function cadastrarAutorizado(condominioId, blocoId, unidadeId, dado
 
   return resposta.json()
 }
+
+export async function listarVagas(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/vagas`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as vagas.')
+  }
+
+  return resposta.json()
+}
+
+export async function criarVaga(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/vagas`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar a vaga.')
+  }
+
+  return resposta.json()
+}
+
+export async function excluirVaga(condominioId, blocoId, unidadeId, vagaId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/vagas/${vagaId}`, {
+    method: 'DELETE',
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível excluir a vaga.')
+  }
+}
+
+export async function listarVeiculos(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/veiculos`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os veículos.')
+  }
+
+  return resposta.json()
+}
+
+export async function cadastrarVeiculo(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/veiculos`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar o veículo.')
+  }
+
+  return resposta.json()
+}
+
+export async function desativarVeiculo(condominioId, blocoId, unidadeId, veiculoId) {
+  const resposta = await fetch(
+    `${urlUnidade(condominioId, blocoId, unidadeId)}/veiculos/${veiculoId}/desativar`,
+    {
+      method: 'PATCH',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível desativar o veículo.')
+  }
+}
+
+export async function buscarVeiculoPorPlaca(condominioId, placa) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/veiculos/busca?placa=${encodeURIComponent(placa)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (resposta.status === 204) return null
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível buscar a placa.')
+  }
+
+  return resposta.json()
+}

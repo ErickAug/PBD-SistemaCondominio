@@ -491,3 +491,43 @@ h2 {
 .listas-unidade .aviso-vazio {
   margin-bottom: 12px;
 }
+
+.nota-linha {
+  flex-basis: 100%;
+  margin: 0;
+}
+
+.busca-placa .campo input {
+  box-sizing: border-box;
+  height: 40px;
+  text-transform: uppercase;
+}
+
+.resultado-vazio {
+  margin-top: 20px;
+}
+
+.resultado-placa {
+  margin-top: 24px;
+  padding: 20px;
+  background: var(--cor-painel);
+  border: 1px solid var(--cor-borda);
+  border-radius: 4px;
+  max-width: 460px;
+}
+
+.resultado-placa h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 1px;
+}
+
+.resultado-placa-veiculo {
+  margin: 4px 0 16px;
+  font-size: 14px;
+  color: var(--cor-texto-suave);
+}
+
+.resultado-placa .papel-rotulo {
+  min-width: 110px;
+}

@@ -8,12 +8,20 @@ import {
   desativarDependente,
   listarAutorizados,
   cadastrarAutorizado,
+  listarVagas,
+  criarVaga,
+  excluirVaga,
+  listarVeiculos,
+  cadastrarVeiculo,
+  desativarVeiculo,
 } from '../services/api.js'
 
 const ABAS = [
   { valor: 'moradores', rotulo: 'Moradores' },
   { valor: 'dependentes', rotulo: 'Dependentes' },
   { valor: 'autorizados', rotulo: 'Autorizados permanentes' },
+  { valor: 'vagas', rotulo: 'Vagas' },
+  { valor: 'veiculos', rotulo: 'Veículos' },
 ]
 
 const TIPOS_SUGERIDOS = ['Diarista', 'Cuidador', 'Professor particular']
@@ -199,6 +207,9 @@ function SecaoMoradores({
                     confirmarEncerramento(m)
                   }}
                 >
+                  <p className="descricao-curta nota-linha">
+                    Os veículos deste morador na unidade também serão desativados, e as vagas ficam livres.
+                  </p>
                   <label className="campo">
                     <span>Data de saída</span>
                     <input
@@ -541,6 +552,324 @@ function SecaoAutorizados({ condominioId, blocoId, unidadeId }) {
   )
 }
 
+const TIPOS_VAGA = [
+  { valor: 'COBERTA', rotulo: 'Coberta' },
+  { valor: 'DESCOBERTA', rotulo: 'Descoberta' },
+]
+
+function rotuloDoTipoVaga(tipo) {
+  return TIPOS_VAGA.find((t) => t.valor === tipo)?.rotulo ?? tipo
+}
+
+function SecaoVagas({ condominioId, blocoId, unidadeId, podeGerenciar, versao }) {
+  const [dados, setDados] = useState({ quantidade: 0, vagas: [] })
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [numero, setNumero] = useState('')
+  const [tipo, setTipo] = useState('COBERTA')
+  const [erroForm, setErroForm] = useState('')
+  const [salvando, setSalvando] = useState(false)
+  const [erroItem, setErroItem] = useState(null)
+
+  const carregar = useCallback(async () => {
+    try {
+      setDados(await listarVagas(condominioId, blocoId, unidadeId))
+      setErro('')
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setCarregando(false)
+    }
+  }, [condominioId, blocoId, unidadeId])
+
+  useEffect(() => {
+    carregar()
+  }, [carregar, versao])
+
+  async function adicionar(evento) {
+    evento.preventDefault()
+    setErroForm('')
+    setSalvando(true)
+    try {
+      await criarVaga(condominioId, blocoId, unidadeId, { numero: numero.trim(), tipo })
+      setNumero('')
+      await carregar()
+    } catch (e) {
+      setErroForm(e.message)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function excluir(vaga) {
+    setErroItem(null)
+    try {
+      await excluirVaga(condominioId, blocoId, unidadeId, vaga.id)
+      await carregar()
+    } catch (e) {
+      setErroItem({ id: vaga.id, mensagem: e.message })
+    }
+  }
+
+  if (carregando) return <p className="aviso-vazio">Carregando...</p>
+
+  return (
+    <div>
+      {erro && <p className="alerta-erro">{erro}</p>}
+
+      <h5 className="subtitulo-lista">
+        {dados.quantidade === 0
+          ? 'Nenhuma vaga cadastrada para esta unidade'
+          : `${dados.quantidade} vaga(s) nesta unidade`}
+      </h5>
+
+      <ul className="lista-condominios">
+        {dados.vagas.map((v) => (
+          <li key={v.id} className="item-unidade">
+            <div className="item-condominio">
+              <div>
+                <strong>Vaga {v.numero}</strong>
+                <p>
+                  {rotuloDoTipoVaga(v.tipo)}
+                  {v.veiculo
+                    ? ` · ${v.veiculo.placa} · ${v.veiculo.modelo} ${v.veiculo.cor}`
+                    : ''}
+                </p>
+              </div>
+              <div className="item-condominio-acoes">
+                <span className={v.veiculo ? 'selo selo-inativo' : 'selo selo-ativo'}>
+                  {v.veiculo ? 'Ocupada' : 'Livre'}
+                </span>
+                {podeGerenciar && (
+                  <button type="button" className="botao-remover" onClick={() => excluir(v)}>
+                    Excluir
+                  </button>
+                )}
+              </div>
+            </div>
+            {erroItem?.id === v.id && <p className="alerta-erro">{erroItem.mensagem}</p>}
+          </li>
+        ))}
+      </ul>
+
+      {podeGerenciar && (
+        <>
+          <h5 className="subtitulo-lista">Adicionar vaga</h5>
+          <p className="descricao-curta">O número da vaga é único no condomínio inteiro.</p>
+          <form onSubmit={adicionar} className="formulario-inline">
+            <label className="campo">
+              <span>Número</span>
+              <input
+                value={numero}
+                onChange={(e) => {
+                  setNumero(e.target.value)
+                  setErroForm('')
+                }}
+                placeholder="Ex: 12"
+                required
+              />
+            </label>
+            <label className="campo">
+              <span>Tipo</span>
+              <select value={tipo} onChange={(e) => setTipo(e.target.value)}>
+                {TIPOS_VAGA.map((t) => (
+                  <option key={t.valor} value={t.valor}>
+                    {t.rotulo}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button type="submit" className="botao-primario" disabled={salvando}>
+              Adicionar vaga
+            </button>
+          </form>
+          {erroForm && <p className="alerta-erro">{erroForm}</p>}
+        </>
+      )}
+    </div>
+  )
+}
+
+function SecaoVeiculos({ condominioId, blocoId, unidadeId, donoFixoId, ocupacaoAtual, versao }) {
+  const formVazio = { placa: '', modelo: '', cor: '', donoId: '', vagaId: '' }
+
+  const [veiculos, setVeiculos] = useState([])
+  const [vagasLivres, setVagasLivres] = useState([])
+  const [moradores, setMoradores] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [form, setForm] = useState(formVazio)
+  const [erroForm, setErroForm] = useState('')
+  const [salvando, setSalvando] = useState(false)
+  const [erroItem, setErroItem] = useState(null)
+
+  const carregar = useCallback(async () => {
+    try {
+      const [listaVeiculos, dadosVagas, listaMoradores] = await Promise.all([
+        listarVeiculos(condominioId, blocoId, unidadeId),
+        listarVagas(condominioId, blocoId, unidadeId),
+        donoFixoId ? Promise.resolve([]) : listarMoradores(condominioId, blocoId, unidadeId),
+      ])
+      setVeiculos(listaVeiculos)
+      setVagasLivres(dadosVagas.vagas.filter((v) => !v.veiculo))
+      setMoradores(listaMoradores)
+      setErro('')
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setCarregando(false)
+    }
+  }, [condominioId, blocoId, unidadeId, donoFixoId])
+
+  useEffect(() => {
+    carregar()
+  }, [carregar, versao])
+
+  const opcoesDono = moradores.map((m) => ({ id: m.moradorId, nome: m.moradorNome }))
+  if (
+    ocupacaoAtual?.tipo === 'PROPRIETARIO_MORANDO' &&
+    ocupacaoAtual.ocupanteId &&
+    !opcoesDono.some((o) => o.id === ocupacaoAtual.ocupanteId)
+  ) {
+    opcoesDono.push({
+      id: ocupacaoAtual.ocupanteId,
+      nome: `${ocupacaoAtual.ocupanteNome} (proprietário)`,
+    })
+  }
+
+  function atualizarCampo(evento) {
+    const { name, value } = evento.target
+    setForm((anterior) => ({ ...anterior, [name]: name === 'placa' ? value.toUpperCase() : value }))
+    setErroForm('')
+  }
+
+  async function cadastrar(evento) {
+    evento.preventDefault()
+    setErroForm('')
+
+    if (!donoFixoId && !form.donoId) {
+      setErroForm('Selecione o dono do veículo.')
+      return
+    }
+
+    setSalvando(true)
+    try {
+      await cadastrarVeiculo(condominioId, blocoId, unidadeId, {
+        donoId: donoFixoId ?? Number(form.donoId),
+        placa: form.placa.trim(),
+        modelo: form.modelo.trim(),
+        cor: form.cor.trim(),
+        vagaId: form.vagaId ? Number(form.vagaId) : null,
+      })
+      setForm(formVazio)
+      await carregar()
+    } catch (e) {
+      setErroForm(e.message)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function desativar(veiculo) {
+    setErroItem(null)
+    try {
+      await desativarVeiculo(condominioId, blocoId, unidadeId, veiculo.id)
+      await carregar()
+    } catch (e) {
+      setErroItem({ id: veiculo.id, mensagem: e.message })
+    }
+  }
+
+  if (carregando) return <p className="aviso-vazio">Carregando...</p>
+
+  return (
+    <div>
+      {erro && <p className="alerta-erro">{erro}</p>}
+
+      <h5 className="subtitulo-lista">
+        {veiculos.length === 0
+          ? 'Nenhum veículo ativo nesta unidade'
+          : `${veiculos.length} veículo(s) ativo(s)`}
+      </h5>
+
+      <ul className="lista-condominios">
+        {veiculos.map((v) => (
+          <li key={v.id} className="item-unidade">
+            <div className="item-condominio">
+              <div>
+                <strong>{v.placa}</strong>
+                <p>
+                  {v.modelo} · {v.cor}
+                </p>
+                <p>
+                  Dono: {v.donoNome} · {v.vagaNumero ? `Vaga ${v.vagaNumero}` : 'Sem vaga'}
+                </p>
+              </div>
+              <button type="button" className="botao-remover" onClick={() => desativar(v)}>
+                Desativar
+              </button>
+            </div>
+            {erroItem?.id === v.id && <p className="alerta-erro">{erroItem.mensagem}</p>}
+          </li>
+        ))}
+      </ul>
+
+      <h5 className="subtitulo-lista">Cadastrar veículo</h5>
+      <p className="descricao-curta">
+        A placa é única no condomínio. A vaga é opcional, e só as vagas livres aparecem na lista.
+      </p>
+      <form onSubmit={cadastrar} className="formulario-inline">
+        <label className="campo">
+          <span>Placa</span>
+          <input
+            name="placa"
+            value={form.placa}
+            onChange={atualizarCampo}
+            placeholder="ABC-1234"
+            required
+          />
+        </label>
+        <label className="campo">
+          <span>Modelo</span>
+          <input name="modelo" value={form.modelo} onChange={atualizarCampo} required />
+        </label>
+        <label className="campo">
+          <span>Cor</span>
+          <input name="cor" value={form.cor} onChange={atualizarCampo} required />
+        </label>
+        {!donoFixoId && (
+          <label className="campo">
+            <span>Dono</span>
+            <select name="donoId" value={form.donoId} onChange={atualizarCampo}>
+              <option value="">Selecione</option>
+              {opcoesDono.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.nome}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <label className="campo">
+          <span>Vaga</span>
+          <select name="vagaId" value={form.vagaId} onChange={atualizarCampo}>
+            <option value="">Sem vaga</option>
+            {vagasLivres.map((v) => (
+              <option key={v.id} value={v.id}>
+                Vaga {v.numero} ({rotuloDoTipoVaga(v.tipo)})
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" className="botao-primario" disabled={salvando}>
+          Cadastrar veículo
+        </button>
+      </form>
+      {erroForm && <p className="alerta-erro">{erroForm}</p>}
+    </div>
+  )
+}
+
 function ListasDaUnidade({
   condominioId,
   blocoId,
@@ -549,6 +878,8 @@ function ListasDaUnidade({
   versao = 0,
   ocupacaoAtual = null,
   aoSairOcupante = null,
+  donoFixoId = null,
+  podeGerenciarVagas = false,
 }) {
   const [aba, setAba] = useState('moradores')
   const ids = { condominioId, blocoId, unidadeId }
@@ -579,6 +910,17 @@ function ListasDaUnidade({
       )}
       {aba === 'dependentes' && <SecaoDependentes {...ids} />}
       {aba === 'autorizados' && <SecaoAutorizados {...ids} />}
+      {aba === 'vagas' && (
+        <SecaoVagas {...ids} podeGerenciar={podeGerenciarVagas} versao={versao} />
+      )}
+      {aba === 'veiculos' && (
+        <SecaoVeiculos
+          {...ids}
+          donoFixoId={donoFixoId}
+          ocupacaoAtual={ocupacaoAtual}
+          versao={versao}
+        />
+      )}
     </div>
   )
 }
