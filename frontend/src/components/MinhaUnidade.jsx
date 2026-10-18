@@ -1,7 +1,7 @@
 import ListasDaUnidade from './ListasDaUnidade.jsx'
 
 function MinhaUnidade({ usuarioLogado }) {
-  const { condominioId, blocoId, blocoNome, unidadeId, unidadeNumero } = usuarioLogado
+  const { condominioId, blocoId, blocoNome, unidadeId, unidadeNumero, usuarioId } = usuarioLogado
 
   const titulo =
     blocoNome && unidadeNumero
@@ -12,8 +12,8 @@ function MinhaUnidade({ usuarioLogado }) {
     <section>
       <h2>{titulo}</h2>
       <p className="descricao">
-        Aqui você cadastra quem mora com você, os dependentes e quem pode
-        entrar sempre, sem precisar autorizar a cada visita.
+        Aqui você cadastra quem mora com você, os dependentes, quem pode
+        entrar sempre e os seus veículos, sem precisar autorizar a cada visita.
       </p>
 
       {!blocoId || !unidadeId ? (
@@ -26,6 +26,7 @@ function MinhaUnidade({ usuarioLogado }) {
           condominioId={condominioId}
           blocoId={blocoId}
           unidadeId={unidadeId}
+          donoFixoId={usuarioId}
         />
       )}
     </section>

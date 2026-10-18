@@ -6,6 +6,7 @@ import CadastroUsuarios from './components/CadastroUsuarios.jsx'
 import AreaPerfil from './components/AreaPerfil.jsx'
 import BlocosUnidades from './components/BlocosUnidades.jsx'
 import MinhaUnidade from './components/MinhaUnidade.jsx'
+import BuscaPlaca from './components/BuscaPlaca.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
 import './App.css'
@@ -105,6 +106,12 @@ function App() {
             >
               Usuários
             </button>
+            <button
+              className={telaAtual === 'busca' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('busca')}
+            >
+              Buscar por placa
+            </button>
           </nav>
         )}
 
@@ -147,8 +154,14 @@ function App() {
                 perfisPermitidos={['MORADOR', 'PROPRIETARIO']}
               />
             )}
+            {telaAtual === 'busca' && (
+              <BuscaPlaca condominioId={usuarioLogado.condominioId} />
+            )}
           </>
-        ) : usuarioLogado.perfil === 'morador' ? (
+        ) : usuarioLogado.perfil === 'portaria' ? (
+          <BuscaPlaca condominioId={usuarioLogado.condominioId} />
+        ) : usuarioLogado.perfil === 'morador' ||
+          (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
           <MinhaUnidade usuarioLogado={usuarioLogado} />
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />

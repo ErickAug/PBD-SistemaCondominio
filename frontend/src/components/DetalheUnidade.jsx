@@ -400,6 +400,7 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
           versao={versaoOcupacao}
           ocupacaoAtual={ocupacaoAtual}
           aoSairOcupante={registrarSaidaDoInquilino}
+          podeGerenciarVagas
         />
       </div>
     </div>
