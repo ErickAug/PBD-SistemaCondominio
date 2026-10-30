@@ -51,8 +51,11 @@ public class DespesaService {
         Despesa despesa = buscarValidandoCondominio(despesaId, condominioId);
         validarDespesa(dadosNovos);
 
-        if (fechamentoMensalService.estaFechado(condominioId, despesa.getData())) {
+        if (existeCompetenciaFechada(despesa, condominioId)) {
             throw new RegraDeNegocioException("Não é possível alterar: o mês desta despesa já está fechado.");
+        }
+        if (fechamentoMensalService.estaFechado(condominioId, dadosNovos.getData())) {
+            throw new RegraDeNegocioException("Não é possível alterar: o novo mês informado já está fechado.");
         }
 
         despesa.setData(dadosNovos.getData());
@@ -75,12 +78,25 @@ public class DespesaService {
     public void excluir(Long despesaId, Long condominioId) {
         Despesa despesa = buscarValidandoCondominio(despesaId, condominioId);
 
-        if (fechamentoMensalService.estaFechado(condominioId, despesa.getData())) {
+        if (existeCompetenciaFechada(despesa, condominioId)) {
             throw new RegraDeNegocioException("Não é possível excluir: o mês desta despesa já está fechado.");
         }
 
         parcelaDespesaRepository.deleteByDespesaId(despesa.getId());
         despesaRepository.delete(despesa);
+    }
+
+    private boolean existeCompetenciaFechada(Despesa despesa, Long condominioId) {
+        if (despesa.getTipo() == TipoDespesa.EXTRAORDINARIA) {
+            List<ParcelaDespesa> parcelas = parcelaDespesaRepository.findByDespesaIdOrderByNumeroParcelaAsc(despesa.getId());
+            for (ParcelaDespesa parcela : parcelas) {
+                if (fechamentoMensalService.estaFechado(condominioId, parcela.getCompetencia())) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return fechamentoMensalService.estaFechado(condominioId, despesa.getData());
     }
 
     public ResultadoListagem listar(Long condominioId, LocalDate dataInicio, LocalDate dataFim,
