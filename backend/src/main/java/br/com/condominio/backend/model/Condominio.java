@@ -1,5 +1,6 @@
 package br.com.condominio.backend.model;
 
+import br.com.condominio.backend.model.enums.ModoRateio;
 import br.com.condominio.backend.model.enums.SituacaoCondominio;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,6 +40,10 @@ public class Condominio {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SituacaoCondominio situacao;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "modo_rateio", nullable = false)
+    private ModoRateio modoRateio = ModoRateio.FRACAO_IDEAL;
 
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY para toda vez que eu buscar um condomínio, ele não ir na tabela administradora toda vez.
     @JoinColumn(name = "administradora_id", nullable = false) // Nome da coluna que vai receber
