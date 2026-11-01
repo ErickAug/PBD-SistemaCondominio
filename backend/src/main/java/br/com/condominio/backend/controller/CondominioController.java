@@ -4,6 +4,7 @@ import br.com.condominio.backend.dto.CondominioRequestDTO;
 import br.com.condominio.backend.dto.CondominioResponseDTO;
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Condominio;
+import br.com.condominio.backend.model.enums.ModoRateio;
 import br.com.condominio.backend.security.TenantAccessGuard;
 import br.com.condominio.backend.security.UsuarioDetailsImpl;
 import br.com.condominio.backend.service.CondominioService;
@@ -43,7 +44,7 @@ public class CondominioController {
         condominio.setEndereco(dto.endereco());
         condominio.setCnpj(dto.cnpj());
         condominio.setSituacao(dto.situacao());
-
+        condominio.setModoRateio(dto.modoRateio() != null ? dto.modoRateio() : ModoRateio.FRACAO_IDEAL);
         Condominio salvo = condominioService.cadastrar(condominio, administradoraId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
@@ -69,6 +70,7 @@ public class CondominioController {
                 condominio.getEndereco(),
                 condominio.getCnpj(),
                 condominio.getSituacao(),
+                condominio.getModoRateio(),
                 condominio.getAdministradora().getId()
         );
     }
