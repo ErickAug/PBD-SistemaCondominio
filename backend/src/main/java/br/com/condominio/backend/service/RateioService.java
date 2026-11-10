@@ -26,11 +26,12 @@ public class RateioService {
     private final UnidadeService unidadeService;
     private final RateioMensalRepository rateioMensalRepository;
     private final RateioUnidadeRepository rateioUnidadeRepository;
+    private final CobrancaService cobrancaService;
 
     public RateioService(DespesaRepository despesaRepository, ParcelaDespesaRepository parcelaDespesaRepository,
                          UnidadeRepository unidadeRepository, OcupacaoService ocupacaoService,
                          UnidadeService unidadeService, RateioMensalRepository rateioMensalRepository,
-                         RateioUnidadeRepository rateioUnidadeRepository) {
+                         RateioUnidadeRepository rateioUnidadeRepository, CobrancaService cobrancaService) {
         this.despesaRepository = despesaRepository;
         this.parcelaDespesaRepository = parcelaDespesaRepository;
         this.unidadeRepository = unidadeRepository;
@@ -38,6 +39,7 @@ public class RateioService {
         this.unidadeService = unidadeService;
         this.rateioMensalRepository = rateioMensalRepository;
         this.rateioUnidadeRepository = rateioUnidadeRepository;
+        this.cobrancaService = cobrancaService;
     }
 
     public List<RateioUnidade> calcular(Condominio condominio, LocalDate competenciaInformada) {
@@ -101,6 +103,7 @@ public class RateioService {
             item.setRateioMensal(rateio);
         }
         rateioUnidadeRepository.saveAll(itens);
+        cobrancaService.gerar(rateio, itens, condominio.getDiaVencimento());
 
         return rateio;
     }

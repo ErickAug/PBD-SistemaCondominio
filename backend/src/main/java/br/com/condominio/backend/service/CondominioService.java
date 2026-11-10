@@ -28,7 +28,9 @@ public class CondominioService {
         if (condominioRepository.existsByCnpj(condominio.getCnpj())) {
             throw new RegraDeNegocioException("Já existe um condomínio cadastrado com este CNPJ.");
         }
-
+        if (condominio.getDiaVencimento() < 1 || condominio.getDiaVencimento() > 28) {
+            throw new RegraDeNegocioException("O dia de vencimento deve estar entre 1 e 28.");
+        }
         condominio.setAdministradora(administradora);
         return condominioRepository.save(condominio);
     }
