@@ -45,7 +45,11 @@ public class CondominioController {
         condominio.setCnpj(dto.cnpj());
         condominio.setSituacao(dto.situacao());
         condominio.setModoRateio(dto.modoRateio() != null ? dto.modoRateio() : ModoRateio.FRACAO_IDEAL);
+        condominio.setSituacao(dto.situacao());
+        condominio.setModoRateio(dto.modoRateio() != null ? dto.modoRateio() : ModoRateio.FRACAO_IDEAL);
+        condominio.setDiaVencimento(dto.diaVencimento() != null ? dto.diaVencimento() : 10);
         Condominio salvo = condominioService.cadastrar(condominio, administradoraId);
+
 
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
     }
@@ -71,7 +75,9 @@ public class CondominioController {
                 condominio.getCnpj(),
                 condominio.getSituacao(),
                 condominio.getModoRateio(),
+                condominio.getDiaVencimento(),
                 condominio.getAdministradora().getId()
+
         );
     }
 
