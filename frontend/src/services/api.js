@@ -488,3 +488,53 @@ export async function buscarVeiculoPorPlaca(condominioId, placa) {
 
   return resposta.json()
 }
+  export async function listarDespesas(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/despesas`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as despesas.')
+  }
+
+  return resposta.json()
+}
+
+export async function cadastrarDespesa(condominioId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/despesas`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar a despesa.')
+  }
+
+  return resposta.json()
+}
+
+export async function atualizarDespesa(condominioId, despesaId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/despesas/${despesaId}`, {
+    method: 'PUT',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível atualizar a despesa.')
+  }
+
+  return resposta.json()
+}
+
+export async function excluirDespesa(condominioId, despesaId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/despesas/${despesaId}`, {
+    method: 'DELETE',
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível excluir a despesa.')
+  }
+}

@@ -1,3 +1,4 @@
+import PaginaDespesas from './components/PaginaDespesas.jsx'
 import { useState, useEffect } from 'react'
 import Login from './components/Login.jsx'
 import CadastroAdministradora from './components/CadastroAdministradora.jsx'
@@ -93,27 +94,33 @@ function App() {
         )}
 
         {ehSindico && (
-          <nav className="sidebar-nav">
-            <button
-              className={telaAtual === 'unidades' ? 'nav-item ativo' : 'nav-item'}
-              onClick={() => setTelaAtual('unidades')}
-            >
-              Blocos e unidades
-            </button>
-            <button
-              className={telaAtual === 'usuarios' ? 'nav-item ativo' : 'nav-item'}
-              onClick={() => setTelaAtual('usuarios')}
-            >
-              Usuários
-            </button>
-            <button
-              className={telaAtual === 'busca' ? 'nav-item ativo' : 'nav-item'}
-              onClick={() => setTelaAtual('busca')}
-            >
-              Buscar por placa
-            </button>
-          </nav>
-        )}
+  <nav className="sidebar-nav">
+    <button
+      className={telaAtual === 'unidades' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('unidades')}
+    >
+      Blocos e unidades
+    </button>
+    <button
+      className={telaAtual === 'usuarios' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('usuarios')}
+    >
+      Usuários
+    </button>
+    <button
+      className={telaAtual === 'despesas' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('despesas')}
+    >
+      Despesas
+    </button>
+    <button
+      className={telaAtual === 'busca' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('busca')}
+    >
+      Buscar por placa
+    </button>
+  </nav>
+)}
 
         <button className="nav-item nav-sair" onClick={sair}>
           Sair
@@ -154,6 +161,9 @@ function App() {
                 perfisPermitidos={['MORADOR', 'PROPRIETARIO']}
               />
             )}
+            {telaAtual === 'despesas' && (
+  <PaginaDespesas condominioId={usuarioLogado.condominioId} />
+)}
             {telaAtual === 'busca' && (
               <BuscaPlaca condominioId={usuarioLogado.condominioId} />
             )}
