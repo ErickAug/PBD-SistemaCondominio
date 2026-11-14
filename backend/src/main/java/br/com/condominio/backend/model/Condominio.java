@@ -45,6 +45,9 @@ public class Condominio {
     @Column(name = "modo_rateio", nullable = false)
     private ModoRateio modoRateio = ModoRateio.FRACAO_IDEAL;
 
+    @Column(name = "dia_vencimento", nullable = false)
+    private Integer diaVencimento = 10;
+
     @ManyToOne(fetch = FetchType.LAZY) // FetchType.LAZY para toda vez que eu buscar um condomínio, ele não ir na tabela administradora toda vez.
     @JoinColumn(name = "administradora_id", nullable = false) // Nome da coluna que vai receber
     private Administradora administradora;
