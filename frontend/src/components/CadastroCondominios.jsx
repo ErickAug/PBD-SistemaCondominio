@@ -45,9 +45,7 @@ function CadastroCondominios({ administradoraId, condominios, setCondominios, er
     <section>
       <h2>Condomínios administrados</h2>
       <p className="descricao">
-        Cada condomínio cadastrado aqui é isolado dos demais: síndicos,
-        porteiros e moradores de um condomínio nunca devem enxergar
-        dados de outro.
+        Insira os dados do condomínio que deseja cadastrar.
       </p>
 
       {erroCarregamento && <p className="erro-login">{erroCarregamento}</p>}

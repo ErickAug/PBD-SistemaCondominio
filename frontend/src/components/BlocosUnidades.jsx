@@ -155,7 +155,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
               fechar 100%
             </span>
           )}
-          {statusFracao.fechaEm100 && <span> — fechou certinho ✓</span>}
+          {statusFracao.fechaEm100 && <span> — fração total completa </span>}
         </div>
       )}
 

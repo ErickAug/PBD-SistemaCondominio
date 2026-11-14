@@ -254,7 +254,7 @@ function SecaoMoradores({
       {candidatos.length === 0 ? (
         <p className="aviso-vazio">
           Nenhum morador disponível para vincular. O síndico precisa criar o acesso
-          (usuário com perfil Morador) antes.
+           antes.
         </p>
       ) : (
         <form onSubmit={registrar} className="formulario-inline">

@@ -96,8 +96,8 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
     <section>
       <h2>Cadastro de usuários</h2>
       <p className="descricao">
-        Não há auto-cadastro: só quem tem permissão cria acessos. Cada
-        usuário pertence a exatamente um condomínio e um perfil. Você
+        Insira os dados do novo usuário e clique em "Cadastrar usuário".
+        Você
         está vendo os usuários de{' '}
         <strong>{condominioAtivo?.nome ?? '—'}</strong>.
       </p>
