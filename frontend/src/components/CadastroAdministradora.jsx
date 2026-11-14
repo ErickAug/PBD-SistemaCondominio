@@ -27,9 +27,7 @@ function CadastroAdministradora() {
     <section>
       <h2>Dados da administradora</h2>
       <p className="descricao">
-        Essas são as informações da própria empresa administradora,
-        exibidas no relatório e usadas para identificar quem
-        gerencia cada condomínio no sistema.
+        Insira os dados da empresa administradora do condomínio.
       </p>
 
       <form onSubmit={aoEnviar} className="formulario">
@@ -83,7 +81,7 @@ function CadastroAdministradora() {
         </button>
 
         {salvo && (
-          <p className="confirmacao">Dados salvos localmente (ainda sem backend).</p>
+          <p className="confirmacao">Dados salvos.</p>
         )}
       </form>
     </section>
