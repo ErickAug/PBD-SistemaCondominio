@@ -538,3 +538,42 @@ export async function excluirDespesa(condominioId, despesaId) {
     await lancarErroComMensagem(resposta, 'Não foi possível excluir a despesa.')
   }
 }
+
+export async function buscarPreviaRateio(condominioId, competencia) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/rateios/previa?competencia=${encodeURIComponent(competencia)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível calcular a prévia do rateio.')
+  }
+
+  return resposta.json()
+}
+
+export async function fecharRateio(condominioId, competencia) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/fechamentos`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify({ competencia }),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível fechar o rateio deste mês.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarFechamentos(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/fechamentos`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o histórico de fechamentos.')
+  }
+
+  return resposta.json()
+}

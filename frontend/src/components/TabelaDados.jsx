@@ -16,6 +16,7 @@ function TabelaDados({
   buscaPlaceholder = 'Buscar...',
   mensagemVazia = 'Nenhum registro encontrado.',
   mensagemErro = '',
+  obterChave = (item) => item.id,
 }) {
   const [termoBusca, setTermoBusca] = useState('')
   const [ordenacao, setOrdenacao] = useState({ chave: null, direcao: 'asc' })
@@ -119,7 +120,7 @@ function TabelaDados({
             )}
 
             {dadosPaginados.map((item) => (
-              <tr key={item.id}>
+              <tr key={obterChave(item)}>
                 {colunas.map((coluna) => (
                   <td key={coluna.chave}>
                     {coluna.renderizar ? coluna.renderizar(item) : item[coluna.chave]}

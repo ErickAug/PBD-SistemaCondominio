@@ -713,3 +713,9 @@ h2 {
 .modal-fechar:hover {
   color: var(--cor-texto);
 }
+
+.botao-primario:disabled,
+.botao-secundario:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

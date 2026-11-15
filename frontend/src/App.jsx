@@ -1,5 +1,6 @@
-import PaginaDespesas from './components/PaginaDespesas.jsx'
 import { useState, useEffect } from 'react'
+import PaginaRateio from './components/PaginaRateio.jsx'
+import PaginaDespesas from './components/PaginaDespesas.jsx'
 import Login from './components/Login.jsx'
 import CadastroAdministradora from './components/CadastroAdministradora.jsx'
 import CadastroCondominios from './components/CadastroCondominios.jsx'
@@ -119,6 +120,12 @@ function App() {
     >
       Buscar por placa
     </button>
+    <button
+      className={telaAtual === 'rateio' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('rateio')}
+    >
+      Rateio do mês
+    </button>
   </nav>
 )}
 
@@ -162,8 +169,11 @@ function App() {
               />
             )}
             {telaAtual === 'despesas' && (
-  <PaginaDespesas condominioId={usuarioLogado.condominioId} />
-)}
+              <PaginaDespesas condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'rateio' && (
+              <PaginaRateio condominioId={usuarioLogado.condominioId} />
+            )}
             {telaAtual === 'busca' && (
               <BuscaPlaca condominioId={usuarioLogado.condominioId} />
             )}
