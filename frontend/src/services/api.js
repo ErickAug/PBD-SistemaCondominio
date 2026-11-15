@@ -577,3 +577,73 @@ export async function listarFechamentos(condominioId) {
 
   return resposta.json()
 }
+
+export async function listarCobrancas(condominioId, competencia, situacao) {
+  const parametros = new URLSearchParams()
+  if (competencia) parametros.set('competencia', competencia)
+  if (situacao) parametros.set('situacao', situacao)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/cobrancas${query}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as cobranças.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarInadimplencia(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/cobrancas/inadimplencia`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar a inadimplência.')
+  }
+
+  return resposta.json()
+}
+
+export async function darBaixaCobranca(condominioId, cobrancaId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/cobrancas/${cobrancaId}/baixa`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+      body: JSON.stringify(dados),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível dar baixa na cobrança.')
+  }
+
+  return resposta.json()
+}
+
+export async function excluirCobranca(condominioId, cobrancaId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/cobrancas/${cobrancaId}`, {
+    method: 'DELETE',
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível excluir a cobrança.')
+  }
+}
+
+export async function listarCobrancasDaUnidade(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/cobrancas`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as cobranças da unidade.')
+  }
+
+  return resposta.json()
+}

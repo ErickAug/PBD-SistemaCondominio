@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import PaginaCobrancas from './components/PaginaCobrancas.jsx'
 import PaginaRateio from './components/PaginaRateio.jsx'
 import PaginaDespesas from './components/PaginaDespesas.jsx'
 import Login from './components/Login.jsx'
@@ -126,6 +127,12 @@ function App() {
     >
       Rateio do mês
     </button>
+    <button
+      className={telaAtual === 'cobrancas' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('cobrancas')}
+    >
+      Cobranças
+    </button>
   </nav>
 )}
 
@@ -173,6 +180,9 @@ function App() {
             )}
             {telaAtual === 'rateio' && (
               <PaginaRateio condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'cobrancas' && (
+              <PaginaCobrancas condominioId={usuarioLogado.condominioId} />
             )}
             {telaAtual === 'busca' && (
               <BuscaPlaca condominioId={usuarioLogado.condominioId} />

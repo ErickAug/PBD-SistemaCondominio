@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import {
   listarMoradores,
   registrarMorador,
@@ -14,7 +14,9 @@ import {
   listarVeiculos,
   cadastrarVeiculo,
   desativarVeiculo,
+  listarCobrancasDaUnidade,
 } from '../services/api.js'
+import TabelaDados from './TabelaDados.jsx'
 
 const ABAS = [
   { valor: 'moradores', rotulo: 'Moradores' },
@@ -22,6 +24,7 @@ const ABAS = [
   { valor: 'autorizados', rotulo: 'Autorizados permanentes' },
   { valor: 'vagas', rotulo: 'Vagas' },
   { valor: 'veiculos', rotulo: 'Veículos' },
+  { valor: 'cobrancas', rotulo: 'Cobranças' },
 ]
 
 const TIPOS_SUGERIDOS = ['Diarista', 'Cuidador', 'Professor particular']
@@ -552,6 +555,93 @@ function SecaoAutorizados({ condominioId, blocoId, unidadeId }) {
   )
 }
 
+const ROTULOS_FORMA_PAGAMENTO = {
+  DINHEIRO: 'Dinheiro',
+  PIX: 'Pix',
+  TRANSFERENCIA: 'Transferência',
+  OUTRO: 'Outro',
+}
+
+function formatarMoeda(valor) {
+  return Number(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+}
+
+function comDerivados(cobranca) {
+  const hoje = new Date()
+  hoje.setHours(0, 0, 0, 0)
+  const vencimento = new Date(`${cobranca.vencimento}T00:00:00`)
+  const emAtraso = cobranca.situacao === 'ABERTA' && vencimento < hoje
+  const diasAtraso = emAtraso ? Math.floor((hoje - vencimento) / (1000 * 60 * 60 * 24)) : 0
+  return { ...cobranca, emAtraso, diasAtraso }
+}
+
+function SecaoCobrancas({ condominioId, blocoId, unidadeId }) {
+  const [cobrancas, setCobrancas] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+
+  const carregar = useCallback(async () => {
+    setCarregando(true)
+    setErro('')
+    try {
+      const dados = await listarCobrancasDaUnidade(condominioId, blocoId, unidadeId)
+      setCobrancas(dados.map(comDerivados))
+    } catch (erroRequisicao) {
+      setErro(erroRequisicao.message)
+    } finally {
+      setCarregando(false)
+    }
+  }, [condominioId, blocoId, unidadeId])
+
+  useEffect(() => {
+    carregar()
+  }, [carregar])
+
+  const colunas = useMemo(
+    () => [
+      { chave: 'competencia', titulo: 'Competência', renderizar: (item) => formatarData(item.competencia) },
+      { chave: 'vencimento', titulo: 'Vencimento', renderizar: (item) => formatarData(item.vencimento) },
+      {
+        chave: 'situacao',
+        titulo: 'Situação',
+        renderizar: (item) => {
+          if (item.situacao === 'PAGA') return <span className="selo selo-ativo">Paga</span>
+          if (item.emAtraso)
+            return <span className="selo selo-vencido">Em atraso ({item.diasAtraso}d)</span>
+          return <span className="selo selo-inativo">Aberta</span>
+        },
+      },
+      { chave: 'valorTotal', titulo: 'Valor', renderizar: (item) => formatarMoeda(item.valorTotal) },
+      { chave: 'responsavelOrdinarioNome', titulo: 'Responsável' },
+      {
+        chave: 'formaPagamento',
+        titulo: 'Pagamento',
+        ordenavel: false,
+        renderizar: (item) =>
+          item.situacao === 'PAGA'
+            ? `${ROTULOS_FORMA_PAGAMENTO[item.formaPagamento] ?? item.formaPagamento} em ${formatarData(item.dataPagamento)}`
+            : '—',
+      },
+    ],
+    []
+  )
+
+  return (
+    <div>
+      <h5 className="subtitulo-lista">Cobranças da unidade</h5>
+      <TabelaDados
+        colunas={colunas}
+        dados={cobrancas}
+        camposBusca={['competencia']}
+        buscaPlaceholder="Buscar por competência..."
+        mensagemVazia="Nenhuma cobrança encontrada para esta unidade."
+        mensagemErro={erro}
+        obterChave={(item) => item.id}
+      />
+    </div>
+  )
+}
+
 const TIPOS_VAGA = [
   { valor: 'COBERTA', rotulo: 'Coberta' },
   { valor: 'DESCOBERTA', rotulo: 'Descoberta' },
@@ -910,6 +1000,7 @@ function ListasDaUnidade({
       )}
       {aba === 'dependentes' && <SecaoDependentes {...ids} />}
       {aba === 'autorizados' && <SecaoAutorizados {...ids} />}
+      {aba === 'cobrancas' && <SecaoCobrancas {...ids} />}
       {aba === 'vagas' && (
         <SecaoVagas {...ids} podeGerenciar={podeGerenciarVagas} versao={versao} />
       )}
