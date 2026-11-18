@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -40,4 +41,23 @@ public interface CobrancaRepository extends JpaRepository<Cobranca, Long> {
             ORDER BY c.vencimento ASC
             """)
     List<Cobranca> listarInadimplentes(@Param("condominioId") Long condominioId, @Param("hoje") LocalDate hoje);
+
+    @Query("""
+            SELECT COALESCE(SUM(c.valorPago), 0) FROM Cobranca c
+            WHERE c.rateioUnidade.rateioMensal.condominio.id = :condominioId
+            AND c.dataPagamento IS NOT NULL
+            AND c.dataPagamento BETWEEN :inicioMes AND :fimMes
+            """)
+    BigDecimal somarReceitaPorPeriodo(@Param("condominioId") Long condominioId,
+                                       @Param("inicioMes") LocalDate inicioMes,
+                                       @Param("fimMes") LocalDate fimMes);
+
+    @Query("""
+            SELECT COALESCE(SUM(c.rateioUnidade.valorOrdinario + c.rateioUnidade.valorExtraordinario), 0) FROM Cobranca c
+            WHERE c.rateioUnidade.rateioMensal.condominio.id = :condominioId
+            AND c.situacao = br.com.condominio.backend.model.enums.SituacaoCobranca.ABERTA
+            AND c.vencimento < :hoje
+            """)
+    BigDecimal somarInadimplenciaAcumulada(@Param("condominioId") Long condominioId,
+                                            @Param("hoje") LocalDate hoje);
 }

@@ -57,6 +57,22 @@ public class TenantAccessGuard {
         return condominio;
     }
 
+    public Condominio validarAcessoResidencialAoCondominio(Long condominioId, UsuarioDetailsImpl usuarioAutenticado) {
+        Usuario usuario = usuarioAutenticado.getUsuario();
+        Condominio condominio = buscarCondominio(condominioId);
+
+        boolean residenteDoCondominio = (usuario.getPerfil() == Perfil.SINDICO
+                || usuario.getPerfil() == Perfil.MORADOR
+                || usuario.getPerfil() == Perfil.PROPRIETARIO)
+                && pertenceAoCondominio(usuario, condominioId);
+
+        if (!ehAdministradoraDona(usuario, condominio) && !residenteDoCondominio) {
+            throw new RegraDeNegocioException("Acesso negado a este condomínio.");
+        }
+
+        return condominio;
+    }
+
     private Condominio buscarCondominio(Long condominioId) {
         return condominioRepository.findById(condominioId)
                 .orElseThrow(() -> new RegraDeNegocioException("Condomínio não encontrado."));
