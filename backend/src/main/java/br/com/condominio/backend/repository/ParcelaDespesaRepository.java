@@ -21,5 +21,16 @@ public interface ParcelaDespesaRepository extends JpaRepository<ParcelaDespesa, 
     BigDecimal somarValorPorCompetencia(@Param("condominioId") Long condominioId,
                                         @Param("competencia") LocalDate competencia);
 
+    @Query("""
+        SELECT p.despesa.categoria AS categoria, COALESCE(SUM(p.valor), 0) AS total
+        FROM ParcelaDespesa p
+        WHERE p.despesa.condominio.id = :condominioId
+        AND p.competencia = :competencia
+        GROUP BY p.despesa.categoria
+        ORDER BY p.despesa.categoria ASC
+        """)
+    List<CategoriaTotalProjection> somarPorCategoria(@Param("condominioId") Long condominioId,
+                                                       @Param("competencia") LocalDate competencia);
+
     void deleteByDespesaId(Long despesaId);
 }
