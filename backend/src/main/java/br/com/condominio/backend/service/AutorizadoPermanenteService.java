@@ -19,7 +19,7 @@ public class AutorizadoPermanenteService {
     }
 
     public AutorizadoPermanente cadastrar(Unidade unidade, String nome, String documento, String tipo,
-                                          LocalDate dataInicio, LocalDate dataFim) {
+                                           LocalDate dataInicio, LocalDate dataFim) {
         if (!dataFim.isAfter(dataInicio)) {
             throw new RegraDeNegocioException("A data de fim deve ser posterior à data de início.");
         }
@@ -42,5 +42,13 @@ public class AutorizadoPermanenteService {
     public boolean estaLiberadoHoje(AutorizadoPermanente autorizado) {
         LocalDate hoje = LocalDate.now();
         return !hoje.isBefore(autorizado.getDataInicio()) && !hoje.isAfter(autorizado.getDataFim());
+    }
+
+    public List<AutorizadoPermanente> buscarPorNomeOuDocumento(Long condominioId, String termo) {
+        return autorizadoPermanenteRepository.buscarPorNomeOuDocumento(condominioId, termo);
+    }
+
+    public List<AutorizadoPermanente> listarValidosHoje(Long condominioId) {
+        return autorizadoPermanenteRepository.listarValidosHoje(condominioId, LocalDate.now());
     }
 }

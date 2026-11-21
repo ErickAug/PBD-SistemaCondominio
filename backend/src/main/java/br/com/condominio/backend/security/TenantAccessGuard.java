@@ -52,6 +52,7 @@ public class TenantAccessGuard {
 
         if (!ehAdministradoraDona(usuario, condominio) && !funcionarioDoCondominio) {
             throw new RegraDeNegocioException("Acesso negado a este condomínio.");
+
         }
 
         return condominio;
