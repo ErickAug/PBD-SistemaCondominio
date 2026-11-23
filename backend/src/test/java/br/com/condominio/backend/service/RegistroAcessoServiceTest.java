@@ -22,23 +22,30 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 /**
- * Testes unitários do card T11 (Registro de entrada).
- * Cobrem os sete critérios de aceite definidos para a portaria.
+ * Testes unitários dos cards T11 (Registro de entrada) e T12 (Registro de saída
+ * e quem está dentro). Cobrem os critérios de aceite definidos para a portaria.
  */
 @ExtendWith(MockitoExtension.class)
 class RegistroAcessoServiceTest {
@@ -318,5 +325,133 @@ class RegistroAcessoServiceTest {
 
         assertEquals(1, resultado.size());
         assertEquals(registro, resultado.get(0));
+    }
+
+    // ---------------------------------------------------------------------
+    // T12 — Registro de saída e quem está dentro
+    // ---------------------------------------------------------------------
+
+    // Critério 1 e 7: registro de saída fecha o par com a entrada e guarda o porteiro da saída
+    @Test
+    void registrarSaidaDeveFecharOParComAEntradaEGuardarOPorteiroDaSaida() {
+        RegistroAcesso registroAberto = new RegistroAcesso();
+        registroAberto.setHoraEntrada(LocalDateTime.now().minusHours(1));
+        when(registroAcessoRepository.buscarPorIdNoCondominio(50L, CONDOMINIO_ID))
+                .thenReturn(Optional.of(registroAberto));
+
+        Usuario porteiroDaSaida = mock(Usuario.class);
+
+        RegistroAcesso registro = registroAcessoService.registrarSaida(CONDOMINIO_ID, 50L, porteiroDaSaida);
+
+        assertNotNull(registro.getHoraSaida());
+        assertEquals(porteiroDaSaida, registro.getPorteiroSaida());
+        verify(registroAcessoRepository).save(registroAberto);
+    }
+
+    // Critério 4: não é possível registrar saída de quem não tem entrada aberta (registro inexistente)
+    @Test
+    void registrarSaidaDeRegistroInexistenteDeveLancarExcecao() {
+        when(registroAcessoRepository.buscarPorIdNoCondominio(999L, CONDOMINIO_ID))
+                .thenReturn(Optional.empty());
+
+        RegraDeNegocioException ex = assertThrows(RegraDeNegocioException.class,
+                () -> registroAcessoService.registrarSaida(CONDOMINIO_ID, 999L, porteiro));
+
+        assertEquals("Registro de acesso não encontrado.", ex.getMessage());
+        verify(registroAcessoRepository, never()).save(any());
+    }
+
+    // Critério 4: não é possível registrar saída de quem já teve a saída registrada
+    @Test
+    void registrarSaidaDeRegistroJaFechadoDeveLancarExcecao() {
+        RegistroAcesso registroFechado = new RegistroAcesso();
+        registroFechado.setHoraEntrada(LocalDateTime.now().minusHours(2));
+        registroFechado.setHoraSaida(LocalDateTime.now().minusHours(1));
+        when(registroAcessoRepository.buscarPorIdNoCondominio(51L, CONDOMINIO_ID))
+                .thenReturn(Optional.of(registroFechado));
+
+        RegraDeNegocioException ex = assertThrows(RegraDeNegocioException.class,
+                () -> registroAcessoService.registrarSaida(CONDOMINIO_ID, 51L, porteiro));
+
+        assertEquals("Esta pessoa já teve a saída registrada.", ex.getMessage());
+        verify(registroAcessoRepository, never()).save(any());
+    }
+
+    // Critério 2: painel com quem está dentro agora
+    @Test
+    void listarQuemEstaDentroDeveDelegarAoRepositorio() {
+        RegistroAcesso registroAberto = new RegistroAcesso();
+        when(registroAcessoRepository.listarAbertosPorCondominio(CONDOMINIO_ID))
+                .thenReturn(List.of(registroAberto));
+
+        List<RegistroAcesso> resultado = registroAcessoService.listarQuemEstaDentro(CONDOMINIO_ID);
+
+        assertEquals(1, resultado.size());
+        assertEquals(registroAberto, resultado.get(0));
+    }
+
+    // Critério 5: a busca por unidade mostra quem está lá dentro naquele momento
+    @Test
+    void listarQuemEstaDentroNaUnidadeDeveDelegarAoRepositorio() {
+        RegistroAcesso registroAberto = new RegistroAcesso();
+        when(registroAcessoRepository.listarAbertosPorUnidade(CONDOMINIO_ID, 10L))
+                .thenReturn(List.of(registroAberto));
+
+        List<RegistroAcesso> resultado = registroAcessoService.listarQuemEstaDentroNaUnidade(CONDOMINIO_ID, 10L);
+
+        assertEquals(1, resultado.size());
+        assertEquals(registroAberto, resultado.get(0));
+    }
+
+    // Critério 6: o histórico de acessos filtra por período, unidade e tipo
+    @Test
+    void filtrarHistoricoDeveConverterPeriodoParaInicioEFimDoDiaEDelegarAoRepositorio() {
+        LocalDate inicio = LocalDate.of(2026, 11, 1);
+        LocalDate fim = LocalDate.of(2026, 11, 30);
+        when(registroAcessoRepository.filtrarHistorico(eq(CONDOMINIO_ID), eq(inicio.atStartOfDay()),
+                eq(fim.atTime(LocalTime.MAX)), eq(10L), eq("Visitante")))
+                .thenReturn(List.of(new RegistroAcesso()));
+
+        List<RegistroAcesso> resultado = registroAcessoService.filtrarHistorico(CONDOMINIO_ID, inicio, fim,
+                10L, "Visitante");
+
+        assertEquals(1, resultado.size());
+    }
+
+    @Test
+    void filtrarHistoricoSemFiltrosDeveRepassarNulosAoRepositorio() {
+        when(registroAcessoRepository.filtrarHistorico(eq(CONDOMINIO_ID), isNull(), isNull(), isNull(), isNull()))
+                .thenReturn(List.of(new RegistroAcesso(), new RegistroAcesso()));
+
+        List<RegistroAcesso> resultado = registroAcessoService.filtrarHistorico(CONDOMINIO_ID, null, null,
+                null, null);
+
+        assertEquals(2, resultado.size());
+    }
+
+    // Critério 3: registro sem saída há muito tempo aparece destacado
+    @Test
+    void estaDemoradoDeveSerVerdadeiroQuandoEntradaPassouDoLimiteSemSaida() {
+        RegistroAcesso registro = new RegistroAcesso();
+        registro.setHoraEntrada(LocalDateTime.now().minusHours(RegistroAcessoService.LIMITE_HORAS_DEMORADO + 1));
+
+        assertTrue(registroAcessoService.estaDemorado(registro));
+    }
+
+    @Test
+    void estaDemoradoDeveSerFalsoQuandoDentroDoLimite() {
+        RegistroAcesso registro = new RegistroAcesso();
+        registro.setHoraEntrada(LocalDateTime.now().minusHours(1));
+
+        assertFalse(registroAcessoService.estaDemorado(registro));
+    }
+
+    @Test
+    void estaDemoradoDeveSerFalsoQuandoJaTeveSaidaMesmoDepoisDoLimite() {
+        RegistroAcesso registro = new RegistroAcesso();
+        registro.setHoraEntrada(LocalDateTime.now().minusHours(RegistroAcessoService.LIMITE_HORAS_DEMORADO + 5));
+        registro.setHoraSaida(LocalDateTime.now().minusHours(1));
+
+        assertFalse(registroAcessoService.estaDemorado(registro));
     }
 }

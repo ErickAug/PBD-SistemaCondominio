@@ -70,4 +70,8 @@ public class RegistroAcesso {
 
     @Column(name = "hora_saida")
     private LocalDateTime horaSaida;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "porteiro_saida_id")
+    private Usuario porteiroSaida;
 }

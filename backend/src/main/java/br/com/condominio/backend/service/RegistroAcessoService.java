@@ -14,11 +14,15 @@ import br.com.condominio.backend.repository.RegistroAcessoRepository;
 import br.com.condominio.backend.repository.UnidadeRepository;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 @Service
 public class RegistroAcessoService {
+
+    public static final long LIMITE_HORAS_DEMORADO = 12;
 
     private final RegistroAcessoRepository registroAcessoRepository;
     private final UnidadeRepository unidadeRepository;
@@ -137,8 +141,44 @@ public class RegistroAcessoService {
         return registroAcessoRepository.save(registro);
     }
 
+    public RegistroAcesso registrarSaida(Long condominioId, Long registroId, Usuario porteiro) {
+        RegistroAcesso registro = registroAcessoRepository.buscarPorIdNoCondominio(registroId, condominioId)
+                .orElseThrow(() -> new RegraDeNegocioException("Registro de acesso não encontrado."));
+
+        if (registro.getHoraSaida() != null) {
+            throw new RegraDeNegocioException("Esta pessoa já teve a saída registrada.");
+        }
+
+        registro.setHoraSaida(LocalDateTime.now());
+        registro.setPorteiroSaida(porteiro);
+
+        return registroAcessoRepository.save(registro);
+    }
+
     public List<RegistroAcesso> listarPorCondominio(Long condominioId) {
         return registroAcessoRepository.listarPorCondominio(condominioId);
+    }
+
+    public List<RegistroAcesso> listarQuemEstaDentro(Long condominioId) {
+        return registroAcessoRepository.listarAbertosPorCondominio(condominioId);
+    }
+
+    public List<RegistroAcesso> listarQuemEstaDentroNaUnidade(Long condominioId, Long unidadeId) {
+        return registroAcessoRepository.listarAbertosPorUnidade(condominioId, unidadeId);
+    }
+
+    public List<RegistroAcesso> filtrarHistorico(Long condominioId, LocalDate inicio, LocalDate fim,
+                                                  Long unidadeId, String tipo) {
+        LocalDateTime inicioDateTime = inicio != null ? inicio.atStartOfDay() : null;
+        LocalDateTime fimDateTime = fim != null ? fim.atTime(LocalTime.MAX) : null;
+
+        return registroAcessoRepository.filtrarHistorico(condominioId, inicioDateTime, fimDateTime,
+                unidadeId, tipo);
+    }
+
+    public boolean estaDemorado(RegistroAcesso registro) {
+        return registro.getHoraSaida() == null
+                && registro.getHoraEntrada().isBefore(LocalDateTime.now().minusHours(LIMITE_HORAS_DEMORADO));
     }
 
     private Unidade buscarUnidadeDoCondominio(Long condominioId, Long unidadeId) {
