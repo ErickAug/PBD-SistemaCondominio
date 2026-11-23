@@ -58,7 +58,7 @@ const autorizacaoCancelada = {
 async function abrirAbaVisitas() {
   render(<ListasDaUnidade condominioId={1} blocoId={1} unidadeId={1} />)
   await waitFor(() => expect(listarMoradores).toHaveBeenCalled())
-  fireEvent.click(screen.getByRole('button', { name: 'Cadastrar autorização' }))
+  fireEvent.click(screen.getByRole('button', { name: 'Autorizar visita' }))
 }
 
 beforeEach(() => {
