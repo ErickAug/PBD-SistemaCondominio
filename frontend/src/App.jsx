@@ -12,6 +12,7 @@ import AreaPerfil from './components/AreaPerfil.jsx'
 import BlocosUnidades from './components/BlocosUnidades.jsx'
 import MinhaUnidade from './components/MinhaUnidade.jsx'
 import BuscaPlaca from './components/BuscaPlaca.jsx'
+import PortariaVisitas from './components/PortariaVisitas.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
 import './App.css'
@@ -200,7 +201,10 @@ function App() {
             )}
           </>
         ) : usuarioLogado.perfil === 'portaria' ? (
-          <BuscaPlaca condominioId={usuarioLogado.condominioId} />
+          <>
+            <BuscaPlaca condominioId={usuarioLogado.condominioId} />
+            <PortariaVisitas condominioId={usuarioLogado.condominioId} />
+          </>
         ) : usuarioLogado.perfil === 'morador' ||
           (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
           <>

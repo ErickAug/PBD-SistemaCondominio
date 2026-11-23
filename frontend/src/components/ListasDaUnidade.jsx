@@ -8,6 +8,9 @@ import {
   desativarDependente,
   listarAutorizados,
   cadastrarAutorizado,
+  listarAutorizacoesVisita,
+  cadastrarAutorizacaoVisita,
+  cancelarAutorizacaoVisita,
   listarVagas,
   criarVaga,
   excluirVaga,
@@ -21,6 +24,7 @@ import TabelaDados from './TabelaDados.jsx'
 const ABAS = [
   { valor: 'moradores', rotulo: 'Moradores' },
   { valor: 'dependentes', rotulo: 'Dependentes' },
+  { valor: 'visitas', rotulo: 'Autorizar visita' },
   { valor: 'autorizados', rotulo: 'Autorizados permanentes' },
   { valor: 'vagas', rotulo: 'Vagas' },
   { valor: 'veiculos', rotulo: 'Veículos' },
@@ -392,6 +396,200 @@ function SecaoDependentes({ condominioId, blocoId, unidadeId }) {
         </label>
         <button type="submit" className="botao-primario" disabled={salvando}>
           Adicionar dependente
+        </button>
+      </form>
+      {erroForm && <p className="alerta-erro">{erroForm}</p>}
+    </div>
+  )
+}
+
+const TIPOS_VISITA = ['Visita', 'Prestador de serviço', 'Entrega']
+
+const ROTULOS_SITUACAO_VISITA = {
+  LIBERADA: 'Liberada',
+  AGUARDANDO: 'Aguardando',
+  VENCIDA: 'Vencida',
+  USADA: 'Usada',
+  CANCELADA: 'Cancelada',
+}
+
+function seloSituacaoVisita(situacao) {
+  if (situacao === 'LIBERADA') return 'selo selo-ativo'
+  if (situacao === 'VENCIDA') return 'selo selo-vencido'
+  return 'selo selo-inativo'
+}
+
+function SecaoVisitas({ condominioId, blocoId, unidadeId }) {
+  const formVazio = { nome: '', documento: '', tipo: '', dataInicio: hoje(), dataFim: '' }
+
+  const [autorizacoes, setAutorizacoes] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erro, setErro] = useState('')
+  const [form, setForm] = useState(formVazio)
+  const [erroForm, setErroForm] = useState('')
+  const [salvando, setSalvando] = useState(false)
+  const [erroItem, setErroItem] = useState(null)
+  const [cancelandoId, setCancelandoId] = useState(null)
+
+  const carregar = useCallback(async () => {
+    try {
+      setAutorizacoes(await listarAutorizacoesVisita(condominioId, blocoId, unidadeId))
+      setErro('')
+    } catch (e) {
+      setErro(e.message)
+    } finally {
+      setCarregando(false)
+    }
+  }, [condominioId, blocoId, unidadeId])
+
+  useEffect(() => {
+    carregar()
+  }, [carregar])
+
+  function atualizarCampo(evento) {
+    const { name, value } = evento.target
+    setForm((anterior) => ({ ...anterior, [name]: value }))
+    setErroForm('')
+  }
+
+  async function adicionar(evento) {
+    evento.preventDefault()
+    setErroForm('')
+
+    if (form.dataFim && form.dataFim < form.dataInicio) {
+      setErroForm('A data final não pode ser anterior à data inicial.')
+      return
+    }
+
+    setSalvando(true)
+    try {
+      await cadastrarAutorizacaoVisita(condominioId, blocoId, unidadeId, {
+        nome: form.nome.trim(),
+        documento: form.documento.trim(),
+        tipo: form.tipo.trim(),
+        dataInicio: form.dataInicio,
+        dataFim: form.dataFim || null,
+      })
+      setForm(formVazio)
+      await carregar()
+    } catch (e) {
+      setErroForm(e.message)
+    } finally {
+      setSalvando(false)
+    }
+  }
+
+  async function cancelar(autorizacao) {
+    setErroItem(null)
+    setCancelandoId(autorizacao.id)
+    try {
+      await cancelarAutorizacaoVisita(condominioId, blocoId, unidadeId, autorizacao.id)
+      await carregar()
+    } catch (e) {
+      setErroItem({ id: autorizacao.id, mensagem: e.message })
+    } finally {
+      setCancelandoId(null)
+    }
+  }
+
+  if (carregando) return <p className="aviso-vazio">Carregando...</p>
+
+  return (
+    <div>
+      {erro && <p className="alerta-erro">{erro}</p>}
+
+      <h5 className="subtitulo-lista">
+        {autorizacoes.length === 0
+          ? 'Nenhuma autorização de visita cadastrada'
+          : `${autorizacoes.length} autorização(ões) de visita`}
+      </h5>
+
+      <p className="descricao-curta">
+        Avise quem você espera para a portaria liberar sem precisar ligar.
+      </p>
+
+      <ul className="lista-condominios">
+        {autorizacoes.map((a) => (
+          <li key={a.id} className="item-unidade">
+            <div className="item-condominio">
+              <div>
+                <strong>{a.nome}</strong>
+                <p>
+                  {a.tipo} · Doc. {a.documento}
+                </p>
+                <p>
+                  {a.dataInicio === a.dataFim
+                    ? formatarData(a.dataInicio)
+                    : `${formatarData(a.dataInicio)} a ${formatarData(a.dataFim)}`}
+                </p>
+              </div>
+              <span className={seloSituacaoVisita(a.situacao)}>
+                {ROTULOS_SITUACAO_VISITA[a.situacao] ?? a.situacao}
+              </span>
+              {a.situacao !== 'CANCELADA' && a.situacao !== 'USADA' && (
+                <button
+                  type="button"
+                  className="botao-remover"
+                  onClick={() => cancelar(a)}
+                  disabled={cancelandoId === a.id}
+                >
+                  Cancelar
+                </button>
+              )}
+            </div>
+            {erroItem?.id === a.id && <p className="alerta-erro">{erroItem.mensagem}</p>}
+          </li>
+        ))}
+      </ul>
+
+      <h5 className="subtitulo-lista">Autorizar visita</h5>
+      <form onSubmit={adicionar} className="formulario-inline">
+        <label className="campo">
+          <span>Nome</span>
+          <input
+            name="nome"
+            value={form.nome}
+            onChange={atualizarCampo}
+            placeholder="Ex: João (entregador)"
+            required
+          />
+        </label>
+        <label className="campo">
+          <span>Documento</span>
+          <input name="documento" value={form.documento} onChange={atualizarCampo} required />
+        </label>
+        <label className="campo">
+          <span>Tipo</span>
+          <input
+            name="tipo"
+            list="tipos-visita"
+            value={form.tipo}
+            onChange={atualizarCampo}
+            placeholder="Ex: Visita"
+            required
+          />
+          <datalist id="tipos-visita">
+            {TIPOS_VISITA.map((t) => (
+              <option key={t} value={t} />
+            ))}
+          </datalist>
+        </label>
+        <label className="campo">
+          <span>De</span>
+          <input
+            type="date"
+            name="dataInicio"
+            value={form.dataInicio}
+            onChange={atualizarCampo}
+            required
+          />
+        </label>
+        <label className="campo">
+          <span>Até (opcional)</span>
+          <input type="date" name="dataFim" value={form.dataFim} onChange={atualizarCampo} />
+        </label>
+        <button type="submit" className="botao-primario" disabled={salvando}>
+          Cadastrar autorização
         </button>
       </form>
       {erroForm && <p className="alerta-erro">{erroForm}</p>}
@@ -999,6 +1197,7 @@ function ListasDaUnidade({
         />
       )}
       {aba === 'dependentes' && <SecaoDependentes {...ids} />}
+      {aba === 'visitas' && <SecaoVisitas {...ids} />}
       {aba === 'autorizados' && <SecaoAutorizados {...ids} />}
       {aba === 'cobrancas' && <SecaoCobrancas {...ids} />}
       {aba === 'vagas' && (

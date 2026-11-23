@@ -673,3 +673,69 @@ export async function baixarRelatorioCsv(condominioId, competencia) {
 
   return resposta.blob()
 }
+export async function listarAutorizacoesVisita(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/visitas`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as autorizações de visita.')
+  }
+
+  return resposta.json()
+}
+
+export async function cadastrarAutorizacaoVisita(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(`${urlUnidade(condominioId, blocoId, unidadeId)}/visitas`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar a autorização de visita.')
+  }
+
+  return resposta.json()
+}
+
+export async function cancelarAutorizacaoVisita(condominioId, blocoId, unidadeId, autorizacaoId) {
+  const resposta = await fetch(
+    `${urlUnidade(condominioId, blocoId, unidadeId)}/visitas/${autorizacaoId}`,
+    {
+      method: 'DELETE',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cancelar a autorização de visita.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarVisitasEsperadas(condominioId, termo) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/visitas/busca?termo=${encodeURIComponent(termo)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível buscar as visitas.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarVisitasEsperadasHoje(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/portaria/visitas/hoje`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as visitas esperadas hoje.')
+  }
+
+  return resposta.json()
+}
