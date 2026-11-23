@@ -488,7 +488,7 @@ export async function buscarVeiculoPorPlaca(condominioId, placa) {
 
   return resposta.json()
 }
-  export async function listarDespesas(condominioId) {
+export async function listarDespesas(condominioId) {
   const resposta = await fetch(`${API_URL}/condominios/${condominioId}/despesas`, {
     headers: headersAutenticados(),
   })
@@ -646,4 +646,30 @@ export async function listarCobrancasDaUnidade(condominioId, blocoId, unidadeId)
   }
 
   return resposta.json()
+}
+
+export async function buscarRelatorioPeriodo(condominioId, competencia) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/relatorios?competencia=${encodeURIComponent(competencia)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o relatório do período.')
+  }
+
+  return resposta.json()
+}
+
+export async function baixarRelatorioCsv(condominioId, competencia) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/relatorios/csv?competencia=${encodeURIComponent(competencia)}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível exportar o CSV do relatório.')
+  }
+
+  return resposta.blob()
 }

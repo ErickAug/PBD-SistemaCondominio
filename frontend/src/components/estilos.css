@@ -719,3 +719,40 @@ h2 {
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.subtitulo-secao {
+  margin-top: 24px;
+  margin-bottom: 8px;
+}
+
+.cards-resumo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.card-resumo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  min-width: 200px;
+  flex: 1;
+}
+
+.card-resumo-titulo {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+.card-resumo-valor {
+  font-size: 1.4rem;
+}
+
+.card-resumo-diferenca {
+  font-size: 0.8rem;
+  color: #888;
+}

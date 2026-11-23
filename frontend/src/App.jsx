@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import PaginaCobrancas from './components/PaginaCobrancas.jsx'
 import PaginaRateio from './components/PaginaRateio.jsx'
 import PaginaDespesas from './components/PaginaDespesas.jsx'
+import PaginaPrestacaoContas from './components/PaginaPrestacaoContas.jsx'
+import PrestacaoContasUnidade from './components/PrestacaoContasUnidade.jsx'
 import Login from './components/Login.jsx'
 import CadastroAdministradora from './components/CadastroAdministradora.jsx'
 import CadastroCondominios from './components/CadastroCondominios.jsx'
@@ -133,6 +135,12 @@ function App() {
     >
       Cobranças
     </button>
+    <button
+      className={telaAtual === 'prestacaoContas' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('prestacaoContas')}
+    >
+      Prestação de contas
+    </button>
   </nav>
 )}
 
@@ -187,12 +195,18 @@ function App() {
             {telaAtual === 'busca' && (
               <BuscaPlaca condominioId={usuarioLogado.condominioId} />
             )}
+            {telaAtual === 'prestacaoContas' && (
+              <PaginaPrestacaoContas condominioId={usuarioLogado.condominioId} />
+            )}
           </>
         ) : usuarioLogado.perfil === 'portaria' ? (
           <BuscaPlaca condominioId={usuarioLogado.condominioId} />
         ) : usuarioLogado.perfil === 'morador' ||
           (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
-          <MinhaUnidade usuarioLogado={usuarioLogado} />
+          <>
+            <MinhaUnidade usuarioLogado={usuarioLogado} />
+            <PrestacaoContasUnidade condominioId={usuarioLogado.condominioId} />
+          </>
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />
         )}
