@@ -8,5 +8,6 @@ public record RegistroAcessoResponseDTO(Long id, Long unidadeId, String blocoNom
                                          String nome, String documento, String tipo,
                                          OrigemRegistroAcesso origem, String quemAutorizou,
                                          String placaVeiculo, String porteiroNome,
-                                         LocalDateTime horaEntrada, LocalDateTime horaSaida) {
+                                         LocalDateTime horaEntrada, LocalDateTime horaSaida,
+                                         String porteiroSaidaNome, boolean demorado) {
 }

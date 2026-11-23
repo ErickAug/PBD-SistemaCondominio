@@ -6,12 +6,14 @@ import br.com.condominio.backend.model.RegistroAcesso;
 import br.com.condominio.backend.security.TenantAccessGuard;
 import br.com.condominio.backend.security.UsuarioDetailsImpl;
 import br.com.condominio.backend.service.RegistroAcessoService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -71,13 +73,61 @@ public class RegistroAcessoController {
     }
 
     @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
-    @GetMapping
-    public ResponseEntity<List<RegistroAcessoResponseDTO>> listar(@PathVariable Long condominioId,
+    @PostMapping("/{registroId}/saida")
+    public ResponseEntity<RegistroAcessoResponseDTO> registrarSaida(@PathVariable Long condominioId,
+                                        @PathVariable Long registroId,
                                         @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
 
         tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
 
-        List<RegistroAcessoResponseDTO> resposta = registroAcessoService.listarPorCondominio(condominioId)
+        RegistroAcesso registro = registroAcessoService.registrarSaida(condominioId, registroId,
+                usuarioAutenticado.getUsuario());
+
+        return ResponseEntity.ok(toResponseDTO(registro));
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
+    @GetMapping("/dentro")
+    public ResponseEntity<List<RegistroAcessoResponseDTO>> listarQuemEstaDentro(@PathVariable Long condominioId,
+                                        @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
+
+        tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
+
+        List<RegistroAcessoResponseDTO> resposta = registroAcessoService.listarQuemEstaDentro(condominioId)
+                .stream().map(this::toResponseDTO).toList();
+
+        return ResponseEntity.ok(resposta);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
+    @GetMapping("/dentro/unidade/{unidadeId}")
+    public ResponseEntity<List<RegistroAcessoResponseDTO>> listarQuemEstaDentroNaUnidade(
+                                        @PathVariable Long condominioId,
+                                        @PathVariable Long unidadeId,
+                                        @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
+
+        tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
+
+        List<RegistroAcessoResponseDTO> resposta = registroAcessoService
+                .listarQuemEstaDentroNaUnidade(condominioId, unidadeId)
+                .stream().map(this::toResponseDTO).toList();
+
+        return ResponseEntity.ok(resposta);
+    }
+
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
+    @GetMapping
+    public ResponseEntity<List<RegistroAcessoResponseDTO>> listar(@PathVariable Long condominioId,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate inicio,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fim,
+                                        @RequestParam(required = false) Long unidadeId,
+                                        @RequestParam(required = false) String tipo,
+                                        @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
+
+        tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
+
+        List<RegistroAcessoResponseDTO> resposta = registroAcessoService
+                .filtrarHistorico(condominioId, inicio, fim, unidadeId, tipo)
                 .stream().map(this::toResponseDTO).toList();
 
         return ResponseEntity.ok(resposta);
@@ -89,6 +139,8 @@ public class RegistroAcessoController {
                 r.getNome(), r.getDocumento(), r.getTipo(), r.getOrigem(), r.getQuemAutorizou(),
                 r.getVeiculo() != null ? r.getVeiculo().getPlaca() : null,
                 r.getPorteiro().getNome(),
-                r.getHoraEntrada(), r.getHoraSaida());
+                r.getHoraEntrada(), r.getHoraSaida(),
+                r.getPorteiroSaida() != null ? r.getPorteiroSaida().getNome() : null,
+                registroAcessoService.estaDemorado(r));
     }
 }
