@@ -817,3 +817,36 @@ export async function listarQuemEstaDentro(condominioId) {
 
   return resposta.json()
 }
+
+export async function listarQuemEstaDentroNaUnidade(condominioId, unidadeId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/dentro/unidade/${unidadeId}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar quem está dentro nessa unidade.')
+  }
+
+  return resposta.json()
+}
+
+export async function filtrarHistoricoAcessos(condominioId, filtros = {}) {
+  const parametros = new URLSearchParams()
+  if (filtros.inicio) parametros.set('inicio', filtros.inicio)
+  if (filtros.fim) parametros.set('fim', filtros.fim)
+  if (filtros.unidadeId) parametros.set('unidadeId', filtros.unidadeId)
+  if (filtros.tipo) parametros.set('tipo', filtros.tipo)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros${query}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o histórico de acessos.')
+  }
+
+  return resposta.json()
+}

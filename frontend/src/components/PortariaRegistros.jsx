@@ -5,7 +5,10 @@ import {
   registrarEntradaManual,
   registrarSaidaAcesso,
   listarQuemEstaDentro,
+  listarQuemEstaDentroNaUnidade,
+  filtrarHistoricoAcessos,
 } from '../services/api.js'
+import TabelaDados from './TabelaDados.jsx'
 
 const TIPOS_REGISTRO = ['Visita', 'Prestador de serviço', 'Entrega', 'Morador', 'Outro']
 
@@ -21,6 +24,45 @@ function formatarHora(dataHora) {
 
 function horasDesde(dataHora) {
   return (Date.now() - new Date(dataHora).getTime()) / 3600000
+}
+
+function ListaDeQuemEstaDentro({ registros, onRegistrarSaida, registrandoSaidaId, erroItem }) {
+  if (registros.length === 0) {
+    return <p className="aviso-vazio">Ninguém registrado como dentro no momento.</p>
+  }
+
+  return (
+    <ul className="lista-condominios">
+      {registros.map((r) => (
+        <li key={r.id} className="item-unidade">
+          <div className="item-condominio">
+            <div>
+              <strong>{r.nome}</strong>
+              <p>
+                {r.tipo} · Doc. {r.documento}
+              </p>
+              <p>
+                {r.blocoNome}, unidade {r.unidadeNumero}
+              </p>
+              <p>Entrada: {formatarHora(r.horaEntrada)}</p>
+            </div>
+            {(r.demorado ?? horasDesde(r.horaEntrada) >= 12) && (
+              <span className="selo selo-vencido">Demorado</span>
+            )}
+            <button
+              type="button"
+              className="botao-remover"
+              onClick={() => onRegistrarSaida(r)}
+              disabled={registrandoSaidaId === r.id}
+            >
+              {registrandoSaidaId === r.id ? 'Registrando...' : 'Registrar saída'}
+            </button>
+          </div>
+          {erroItem?.id === r.id && <p className="alerta-erro">{erroItem.mensagem}</p>}
+        </li>
+      ))}
+    </ul>
+  )
 }
 
 function PortariaRegistros({ condominioId }) {
@@ -46,6 +88,23 @@ function PortariaRegistros({ condominioId }) {
   const [erroItem, setErroItem] = useState(null)
   const [registrandoSaidaId, setRegistrandoSaidaId] = useState(null)
 
+  const [buscaBlocoId, setBuscaBlocoId] = useState('')
+  const [buscaUnidadeId, setBuscaUnidadeId] = useState('')
+  const [unidadesBusca, setUnidadesBusca] = useState([])
+  const [resultadoBusca, setResultadoBusca] = useState(null)
+  const [carregandoBusca, setCarregandoBusca] = useState(false)
+  const [erroBusca, setErroBusca] = useState('')
+  const [erroItemBusca, setErroItemBusca] = useState(null)
+  const [registrandoSaidaBuscaId, setRegistrandoSaidaBuscaId] = useState(null)
+
+  const filtroHistoricoVazio = { inicio: '', fim: '', blocoId: '', unidadeId: '', tipo: '' }
+  const [filtroHistorico, setFiltroHistorico] = useState(filtroHistoricoVazio)
+  const [unidadesHistorico, setUnidadesHistorico] = useState([])
+  const [historico, setHistorico] = useState([])
+  const [carregandoHistorico, setCarregandoHistorico] = useState(false)
+  const [erroHistorico, setErroHistorico] = useState('')
+  const [buscouHistorico, setBuscouHistorico] = useState(false)
+
   useEffect(() => {
     listarBlocos(condominioId)
       .then(setBlocos)
@@ -61,6 +120,26 @@ function PortariaRegistros({ condominioId }) {
       .then(setUnidades)
       .catch(() => setUnidades([]))
   }, [condominioId, form.blocoId])
+
+  useEffect(() => {
+    if (!buscaBlocoId) {
+      setUnidadesBusca([])
+      return
+    }
+    listarUnidades(condominioId, buscaBlocoId)
+      .then(setUnidadesBusca)
+      .catch(() => setUnidadesBusca([]))
+  }, [condominioId, buscaBlocoId])
+
+  useEffect(() => {
+    if (!filtroHistorico.blocoId) {
+      setUnidadesHistorico([])
+      return
+    }
+    listarUnidades(condominioId, filtroHistorico.blocoId)
+      .then(setUnidadesHistorico)
+      .catch(() => setUnidadesHistorico([]))
+  }, [condominioId, filtroHistorico.blocoId])
 
   const carregarQuemEstaDentro = useCallback(async () => {
     setCarregandoDentro(true)
@@ -127,12 +206,133 @@ function PortariaRegistros({ condominioId }) {
     try {
       await registrarSaidaAcesso(condominioId, registro.id)
       await carregarQuemEstaDentro()
+      if (resultadoBusca) {
+        await buscarQuemEstaDentroNaUnidade()
+      }
     } catch (e) {
       setErroItem({ id: registro.id, mensagem: e.message })
     } finally {
       setRegistrandoSaidaId(null)
     }
   }
+
+  function atualizarCampoBusca(evento) {
+    const { name, value } = evento.target
+    if (name === 'buscaBlocoId') {
+      setBuscaBlocoId(value)
+      setBuscaUnidadeId('')
+    } else {
+      setBuscaUnidadeId(value)
+    }
+    setResultadoBusca(null)
+    setErroBusca('')
+  }
+
+  async function buscarQuemEstaDentroNaUnidade(evento) {
+    if (evento) evento.preventDefault()
+    if (!buscaUnidadeId) {
+      setErroBusca('Selecione a unidade para buscar.')
+      return
+    }
+    setCarregandoBusca(true)
+    setErroBusca('')
+    try {
+      setResultadoBusca(await listarQuemEstaDentroNaUnidade(condominioId, buscaUnidadeId))
+    } catch (e) {
+      setErroBusca(e.message)
+      setResultadoBusca(null)
+    } finally {
+      setCarregandoBusca(false)
+    }
+  }
+
+  async function registrarSaidaBusca(registro) {
+    setErroItemBusca(null)
+    setRegistrandoSaidaBuscaId(registro.id)
+    try {
+      await registrarSaidaAcesso(condominioId, registro.id)
+      await buscarQuemEstaDentroNaUnidade()
+      await carregarQuemEstaDentro()
+    } catch (e) {
+      setErroItemBusca({ id: registro.id, mensagem: e.message })
+    } finally {
+      setRegistrandoSaidaBuscaId(null)
+    }
+  }
+
+  function atualizarCampoFiltro(evento) {
+    const { name, value } = evento.target
+    setFiltroHistorico((anterior) => {
+      if (name === 'blocoId') {
+        return { ...anterior, blocoId: value, unidadeId: '' }
+      }
+      return { ...anterior, [name]: value }
+    })
+  }
+
+  async function filtrarHistorico(evento) {
+    if (evento) evento.preventDefault()
+    setCarregandoHistorico(true)
+    setErroHistorico('')
+    setBuscouHistorico(true)
+    try {
+      setHistorico(
+        await filtrarHistoricoAcessos(condominioId, {
+          inicio: filtroHistorico.inicio || null,
+          fim: filtroHistorico.fim || null,
+          unidadeId: filtroHistorico.unidadeId || null,
+          tipo: filtroHistorico.tipo || null,
+        })
+      )
+    } catch (e) {
+      setErroHistorico(e.message)
+      setHistorico([])
+    } finally {
+      setCarregandoHistorico(false)
+    }
+  }
+
+  function limparFiltroHistorico() {
+    setFiltroHistorico(filtroHistoricoVazio)
+    setHistorico([])
+    setErroHistorico('')
+    setBuscouHistorico(false)
+  }
+
+  const colunasHistorico = [
+    { chave: 'nome', titulo: 'Nome' },
+    { chave: 'documento', titulo: 'Documento' },
+    { chave: 'tipo', titulo: 'Tipo' },
+    {
+      chave: 'unidadeNumero',
+      titulo: 'Unidade',
+      renderizar: (r) => `${r.blocoNome}, ${r.unidadeNumero}`,
+    },
+    { chave: 'horaEntrada', titulo: 'Entrada', renderizar: (r) => formatarHora(r.horaEntrada) },
+    { chave: 'porteiroNome', titulo: 'Porteiro (entrada)' },
+    {
+      chave: 'horaSaida',
+      titulo: 'Saída',
+      renderizar: (r) => (r.horaSaida ? formatarHora(r.horaSaida) : '—'),
+    },
+    {
+      chave: 'porteiroSaidaNome',
+      titulo: 'Porteiro (saída)',
+      renderizar: (r) => r.porteiroSaidaNome || '—',
+    },
+    {
+      chave: 'demorado',
+      titulo: 'Situação',
+      renderizar: (r) =>
+        r.horaSaida ? (
+          'Encerrado'
+        ) : r.demorado ? (
+          <span className="selo selo-vencido">Demorado</span>
+        ) : (
+          'Em andamento'
+        ),
+    },
+  ]
 
   return (
     <section>
@@ -217,37 +417,128 @@ function PortariaRegistros({ condominioId }) {
       {erroDentro && <p className="alerta-erro">{erroDentro}</p>}
       {carregandoDentro ? (
         <p className="aviso-vazio">Carregando...</p>
-      ) : quemEstaDentro.length === 0 ? (
-        <p className="aviso-vazio">Ninguém registrado como dentro no momento.</p>
       ) : (
-        <ul className="lista-condominios">
-          {quemEstaDentro.map((r) => (
-            <li key={r.id} className="item-unidade">
-              <div className="item-condominio">
-                <div>
-                  <strong>{r.nome}</strong>
-                  <p>
-                    {r.tipo} · Doc. {r.documento}
-                  </p>
-                  <p>
-                    {r.blocoNome}, unidade {r.unidadeNumero}
-                  </p>
-                  <p>Entrada: {formatarHora(r.horaEntrada)}</p>
-                </div>
-                {horasDesde(r.horaEntrada) >= 12 && <span className="selo selo-vencido">Demorado</span>}
-                <button
-                  type="button"
-                  className="botao-remover"
-                  onClick={() => registrarSaida(r)}
-                  disabled={registrandoSaidaId === r.id}
-                >
-                  {registrandoSaidaId === r.id ? 'Registrando...' : 'Registrar saída'}
-                </button>
-              </div>
-              {erroItem?.id === r.id && <p className="alerta-erro">{erroItem.mensagem}</p>}
-            </li>
-          ))}
-        </ul>
+        <ListaDeQuemEstaDentro
+          registros={quemEstaDentro}
+          onRegistrarSaida={registrarSaida}
+          registrandoSaidaId={registrandoSaidaId}
+          erroItem={erroItem}
+        />
+      )}
+
+      <h3 className="subtitulo-secao">Buscar quem está dentro por unidade</h3>
+      <p className="descricao">
+        Veja rapidamente quem está dentro do condomínio em uma unidade específica.
+      </p>
+      <form onSubmit={buscarQuemEstaDentroNaUnidade} className="formulario-inline">
+        <label className="campo">
+          <span>Bloco para busca</span>
+          <select name="buscaBlocoId" value={buscaBlocoId} onChange={atualizarCampoBusca}>
+            <option value="">Selecione</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.nome}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="campo">
+          <span>Unidade para busca</span>
+          <select
+            name="buscaUnidadeId"
+            value={buscaUnidadeId}
+            onChange={atualizarCampoBusca}
+            disabled={!buscaBlocoId}
+          >
+            <option value="">Selecione</option>
+            {unidadesBusca.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.numero}
+              </option>
+            ))}
+          </select>
+        </label>
+        <button type="submit" className="botao-secundario" disabled={carregandoBusca}>
+          {carregandoBusca ? 'Buscando...' : 'Buscar'}
+        </button>
+      </form>
+      {erroBusca && <p className="alerta-erro">{erroBusca}</p>}
+      {resultadoBusca && (
+        <ListaDeQuemEstaDentro
+          registros={resultadoBusca}
+          onRegistrarSaida={registrarSaidaBusca}
+          registrandoSaidaId={registrandoSaidaBuscaId}
+          erroItem={erroItemBusca}
+        />
+      )}
+
+      <h3 className="subtitulo-secao">Histórico de acessos</h3>
+      <p className="descricao">
+        Filtre o histórico completo de entradas e saídas por período, unidade e tipo.
+      </p>
+      <form onSubmit={filtrarHistorico} className="formulario-inline">
+        <label className="campo">
+          <span>De</span>
+          <input type="date" name="inicio" value={filtroHistorico.inicio} onChange={atualizarCampoFiltro} />
+        </label>
+        <label className="campo">
+          <span>Até</span>
+          <input type="date" name="fim" value={filtroHistorico.fim} onChange={atualizarCampoFiltro} />
+        </label>
+        <label className="campo">
+          <span>Filtrar por bloco</span>
+          <select name="blocoId" value={filtroHistorico.blocoId} onChange={atualizarCampoFiltro}>
+            <option value="">Todos</option>
+            {blocos.map((b) => (
+              <option key={b.id} value={b.id}>
+                {b.nome}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="campo">
+          <span>Filtrar por unidade</span>
+          <select
+            name="unidadeId"
+            value={filtroHistorico.unidadeId}
+            onChange={atualizarCampoFiltro}
+            disabled={!filtroHistorico.blocoId}
+          >
+            <option value="">Todas</option>
+            {unidadesHistorico.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.numero}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="campo">
+          <span>Filtrar por tipo</span>
+          <input
+            name="tipo"
+            list="tipos-registro"
+            value={filtroHistorico.tipo}
+            onChange={atualizarCampoFiltro}
+            placeholder="Todos"
+          />
+        </label>
+        <button type="submit" className="botao-primario" disabled={carregandoHistorico}>
+          {carregandoHistorico ? 'Filtrando...' : 'Filtrar'}
+        </button>
+        <button type="button" className="botao-secundario" onClick={limparFiltroHistorico}>
+          Limpar
+        </button>
+      </form>
+
+      {buscouHistorico && (
+        <TabelaDados
+          colunas={colunasHistorico}
+          dados={historico}
+          camposBusca={['nome', 'documento', 'tipo']}
+          buscaPlaceholder="Buscar por nome, documento ou tipo..."
+          mensagemVazia="Nenhum registro encontrado para os filtros selecionados."
+          mensagemErro={erroHistorico}
+        />
       )}
     </section>
   )
