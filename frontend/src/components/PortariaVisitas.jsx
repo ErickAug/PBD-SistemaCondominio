@@ -1,5 +1,10 @@
 import { useEffect, useState, useCallback } from 'react'
-import { buscarVisitasEsperadas, listarVisitasEsperadasHoje } from '../services/api.js'
+import {
+  buscarVisitasEsperadas,
+  listarVisitasEsperadasHoje,
+  registrarEntradaPorAutorizacaoVisita,
+  registrarEntradaPorAutorizadoPermanente,
+} from '../services/api.js'
 
 function formatarData(data) {
   return data.split('-').reverse().join('/')
@@ -24,7 +29,29 @@ function seloSituacao(situacao) {
   return 'selo selo-inativo'
 }
 
-function ItemVisita({ visita }) {
+function ItemVisita({ visita, condominioId, aoRegistrarEntrada }) {
+  const [registrando, setRegistrando] = useState(false)
+  const [erroRegistro, setErroRegistro] = useState('')
+  const [registrado, setRegistrado] = useState(false)
+
+  async function registrarEntrada() {
+    setErroRegistro('')
+    setRegistrando(true)
+    try {
+      if (visita.origem === 'AVULSA') {
+        await registrarEntradaPorAutorizacaoVisita(condominioId, visita.id)
+      } else {
+        await registrarEntradaPorAutorizadoPermanente(condominioId, visita.id)
+      }
+      setRegistrado(true)
+      aoRegistrarEntrada?.()
+    } catch (e) {
+      setErroRegistro(e.message)
+    } finally {
+      setRegistrando(false)
+    }
+  }
+
   return (
     <li className="item-unidade">
       <div className="item-condominio">
@@ -47,7 +74,18 @@ function ItemVisita({ visita }) {
         <span className={seloSituacao(visita.situacao)}>
           {ROTULOS_SITUACAO[visita.situacao] ?? visita.situacao}
         </span>
+        {visita.situacao === 'LIBERADA' && (
+          <button
+            type="button"
+            className="botao-primario"
+            onClick={registrarEntrada}
+            disabled={registrando || registrado}
+          >
+            {registrado ? 'Entrada registrada' : registrando ? 'Registrando...' : 'Registrar entrada'}
+          </button>
+        )}
       </div>
+      {erroRegistro && <p className="alerta-erro">{erroRegistro}</p>}
     </li>
   )
 }
@@ -134,7 +172,12 @@ function PortariaVisitas({ condominioId }) {
           </h5>
           <ul className="lista-condominios">
             {resultadoBusca.map((v) => (
-              <ItemVisita key={`${v.origem}-${v.id}`} visita={v} />
+              <ItemVisita
+                key={`${v.origem}-${v.id}`}
+                visita={v}
+                condominioId={condominioId}
+                aoRegistrarEntrada={carregarHoje}
+              />
             ))}
           </ul>
         </>
@@ -151,7 +194,12 @@ function PortariaVisitas({ condominioId }) {
       ) : (
         <ul className="lista-condominios">
           {esperadasHoje.map((v) => (
-            <ItemVisita key={`${v.origem}-${v.id}`} visita={v} />
+            <ItemVisita
+              key={`${v.origem}-${v.id}`}
+              visita={v}
+              condominioId={condominioId}
+              aoRegistrarEntrada={carregarHoje}
+            />
           ))}
         </ul>
       )}

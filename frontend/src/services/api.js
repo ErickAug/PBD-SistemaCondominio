@@ -739,3 +739,81 @@ export async function listarVisitasEsperadasHoje(condominioId) {
 
   return resposta.json()
 }
+
+export async function registrarEntradaManual(condominioId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/manual`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+      body: JSON.stringify(dados),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a entrada.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarEntradaPorAutorizacaoVisita(condominioId, autorizacaoVisitaId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/autorizacao-visita/${autorizacaoVisitaId}`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a entrada.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarEntradaPorAutorizadoPermanente(condominioId, autorizadoPermanenteId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/autorizado-permanente/${autorizadoPermanenteId}`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a entrada.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarSaidaAcesso(condominioId, registroId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/${registroId}/saida`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a saída.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarQuemEstaDentro(condominioId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/registros/dentro`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar quem está dentro.')
+  }
+
+  return resposta.json()
+}
