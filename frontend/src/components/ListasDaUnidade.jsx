@@ -1187,30 +1187,32 @@ function ListasDaUnidade({
         ))}
       </div>
 
-      {aba === 'moradores' && (
-        <SecaoMoradores
-          {...ids}
-          usuarios={usuarios}
-          versao={versao}
-          ocupacaoAtual={ocupacaoAtual}
-          aoSairOcupante={aoSairOcupante}
-        />
-      )}
-      {aba === 'dependentes' && <SecaoDependentes {...ids} />}
-      {aba === 'visitas' && <SecaoVisitas {...ids} />}
-      {aba === 'autorizados' && <SecaoAutorizados {...ids} />}
-      {aba === 'cobrancas' && <SecaoCobrancas {...ids} />}
-      {aba === 'vagas' && (
-        <SecaoVagas {...ids} podeGerenciar={podeGerenciarVagas} versao={versao} />
-      )}
-      {aba === 'veiculos' && (
-        <SecaoVeiculos
-          {...ids}
-          donoFixoId={donoFixoId}
-          ocupacaoAtual={ocupacaoAtual}
-          versao={versao}
-        />
-      )}
+      <div className="aba-conteudo" key={aba}>
+        {aba === 'moradores' && (
+          <SecaoMoradores
+            {...ids}
+            usuarios={usuarios}
+            versao={versao}
+            ocupacaoAtual={ocupacaoAtual}
+            aoSairOcupante={aoSairOcupante}
+          />
+        )}
+        {aba === 'dependentes' && <SecaoDependentes {...ids} />}
+        {aba === 'visitas' && <SecaoVisitas {...ids} />}
+        {aba === 'autorizados' && <SecaoAutorizados {...ids} />}
+        {aba === 'cobrancas' && <SecaoCobrancas {...ids} />}
+        {aba === 'vagas' && (
+          <SecaoVagas {...ids} podeGerenciar={podeGerenciarVagas} versao={versao} />
+        )}
+        {aba === 'veiculos' && (
+          <SecaoVeiculos
+            {...ids}
+            donoFixoId={donoFixoId}
+            ocupacaoAtual={ocupacaoAtual}
+            versao={versao}
+          />
+        )}
+      </div>
     </div>
   )
 }

@@ -8,6 +8,7 @@ import {
   buscarStatusFracaoIdeal,
 } from '../services/api.js'
 import DetalheUnidade from './DetalheUnidade.jsx'
+import TabelaDados from './TabelaDados.jsx'
 
 const FORM_UNIDADE_VAZIO = {
   blocoId: '',
@@ -124,6 +125,67 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
     return blocos.find((b) => b.id === blocoId)?.nome ?? '—'
   }
 
+  const unidadeAberta = unidades.find((u) => u.id === unidadeAbertaId) ?? null
+
+  const unidadesParaTabela = unidades.map((unidade) => ({
+    ...unidade,
+    blocoNome: nomeDoBloco(unidade.blocoId),
+    statusTexto: unidade.ocupada ? 'Ocupada' : 'Vaga',
+  }))
+
+  const colunasUnidades = [
+    { chave: 'blocoNome', titulo: 'Bloco' },
+    { chave: 'numero', titulo: 'Unidade' },
+    { chave: 'andar', titulo: 'Andar' },
+    {
+      chave: 'area',
+      titulo: 'Área',
+      renderizar: (item) => `${item.area} m²`,
+    },
+    {
+      chave: 'fracaoIdeal',
+      titulo: 'Fração ideal',
+      renderizar: (item) => `${Number(item.fracaoIdeal).toFixed(2)}%`,
+    },
+    {
+      chave: 'statusTexto',
+      titulo: 'Situação',
+      renderizar: (item) => (
+        <span className={item.ocupada ? 'selo selo-inativo' : 'selo selo-ativo'}>
+          {item.statusTexto}
+        </span>
+      ),
+    },
+    {
+      chave: 'acoes',
+      titulo: 'Ações',
+      ordenavel: false,
+      renderizar: (item) => (
+        <div className="tabela-dados-acoes">
+          <button
+            onClick={() => setUnidadeAbertaId(item.id)}
+            className="botao-secundario"
+            type="button"
+          >
+            Detalhes
+          </button>
+          <button
+            onClick={() => tentarExcluirUnidade(item)}
+            className="botao-remover"
+            type="button"
+          >
+            Excluir
+          </button>
+        </div>
+      ),
+    },
+  ]
+
+  const mensagemErroExclusao = erroExclusao
+    ? `Unidade ${unidades.find((u) => u.id === erroExclusao.unidadeId)?.numero ?? ''}: ${erroExclusao.mensagem}`
+    : ''
+
+
   if (carregando) {
     return (
       <section>
@@ -160,13 +222,16 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
       )}
 
       <h3 className="lista-titulo">Blocos</h3>
-      <form onSubmit={cadastrarBloco} className="formulario formulario-linha">
-        <input
-          value={nomeBloco}
-          onChange={(e) => setNomeBloco(e.target.value)}
-          placeholder="Ex: Bloco A"
-          disabled={enviando}
-        />
+      <form onSubmit={cadastrarBloco} className="formulario-inline">
+        <label className="campo">
+          <span>Nome do bloco</span>
+          <input
+            value={nomeBloco}
+            onChange={(e) => setNomeBloco(e.target.value)}
+            placeholder="Ex: Bloco A"
+            disabled={enviando}
+          />
+        </label>
         <button type="submit" className="botao-primario" disabled={enviando}>
           {enviando ? 'Salvando...' : 'Adicionar bloco'}
         </button>
@@ -272,57 +337,24 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
           : `${unidades.length} unidade(s) cadastrada(s)`}
       </h3>
 
-      <ul className="lista-condominios">
-        {unidades.map((unidade) => (
-          <li key={unidade.id} className="item-unidade">
-            <div className="item-condominio">
-              <div>
-                <strong>
-                  {nomeDoBloco(unidade.blocoId)} · unidade {unidade.numero}
-                </strong>
-                <p>
-                  {unidade.andar}º andar · {unidade.area} m² · fração{' '}
-                  {Number(unidade.fracaoIdeal).toFixed(2)}%
-                </p>
-              </div>
-              <div className="item-condominio-acoes">
-                <span className={unidade.ocupada ? 'selo selo-inativo' : 'selo selo-ativo'}>
-                  {unidade.ocupada ? 'Ocupada' : 'Vaga'}
-                </span>
-                <button
-                  onClick={() =>
-                    setUnidadeAbertaId(unidadeAbertaId === unidade.id ? null : unidade.id)
-                  }
-                  className="botao-detalhes"
-                  type="button"
-                >
-                  {unidadeAbertaId === unidade.id ? 'Fechar' : 'Detalhes'}
-                </button>
-                <button
-                  onClick={() => tentarExcluirUnidade(unidade)}
-                  className="botao-remover"
-                  type="button"
-                >
-                  Excluir
-                </button>
-              </div>
-            </div>
+      <TabelaDados
+        colunas={colunasUnidades}
+        dados={unidadesParaTabela}
+        camposBusca={['numero', 'blocoNome']}
+        buscaPlaceholder="Buscar por bloco ou número da unidade..."
+        mensagemVazia="Nenhuma unidade cadastrada ainda."
+        mensagemErro={mensagemErroExclusao}
+      />
 
-            {erroExclusao?.unidadeId === unidade.id && (
-              <p className="alerta-erro">{erroExclusao.mensagem}</p>
-            )}
-
-            {unidadeAbertaId === unidade.id && (
-              <DetalheUnidade
-                condominioId={condominioId}
-                unidade={unidade}
-                nomeBloco={nomeDoBloco(unidade.blocoId)}
-                aoAtualizar={() => carregarTudo(true)}
-              />
-            )}
-          </li>
-        ))}
-      </ul>
+      {unidadeAberta && (
+        <DetalheUnidade
+          condominioId={condominioId}
+          unidade={unidadeAberta}
+          nomeBloco={nomeDoBloco(unidadeAberta.blocoId)}
+          aoAtualizar={() => carregarTudo(true)}
+          aoFechar={() => setUnidadeAbertaId(null)}
+        />
+      )}
     </section>
   )
 }

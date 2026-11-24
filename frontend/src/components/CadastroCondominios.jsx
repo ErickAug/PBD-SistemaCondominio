@@ -1,5 +1,21 @@
 import { useState } from 'react'
 import { criarCondominio } from '../services/api.js'
+import TabelaDados from './TabelaDados.jsx'
+
+const COLUNAS_CONDOMINIOS = [
+  { chave: 'nome', titulo: 'Nome' },
+  { chave: 'endereco', titulo: 'Endereço' },
+  { chave: 'cnpj', titulo: 'CNPJ' },
+  {
+    chave: 'situacao',
+    titulo: 'Situação',
+    renderizar: (item) => (
+      <span className={item.situacao === 'ATIVO' ? 'selo selo-ativo' : 'selo selo-inativo'}>
+        {item.situacao === 'ATIVO' ? 'Ativo' : 'Inativo'}
+      </span>
+    ),
+  },
+]
 
 function CadastroCondominios({ administradoraId, condominios, setCondominios, erroCarregamento }) {
   const [form, setForm] = useState({
@@ -129,24 +145,13 @@ function CadastroCondominios({ administradoraId, condominios, setCondominios, er
           : `${condominios.length} condomínio(s) cadastrado(s)`}
       </h3>
 
-      <ul className="lista-condominios">
-        {condominios.map((condominio) => (
-          <li key={condominio.id} className="item-condominio">
-            <div>
-              <strong>{condominio.nome}</strong>
-              <p>{condominio.endereco}</p>
-              <p>CNPJ: {condominio.cnpj}</p>
-            </div>
-            <span
-              className={
-                condominio.situacao === 'ATIVO' ? 'selo selo-ativo' : 'selo selo-inativo'
-              }
-            >
-              {condominio.situacao === 'ATIVO' ? 'Ativo' : 'Inativo'}
-            </span>
-          </li>
-        ))}
-      </ul>
+      <TabelaDados
+        colunas={COLUNAS_CONDOMINIOS}
+        dados={condominios}
+        camposBusca={['nome', 'endereco', 'cnpj']}
+        buscaPlaceholder="Buscar por nome, endereço ou CNPJ..."
+        mensagemVazia="Nenhum condomínio cadastrado ainda."
+      />
     </section>
   )
 }

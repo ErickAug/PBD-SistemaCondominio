@@ -28,7 +28,7 @@ h2 {
 .campo input {
   padding: 10px 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   color: var(--cor-texto);
   background: var(--cor-painel);
@@ -59,7 +59,7 @@ h2 {
   color: #FFFFFF;
   border: none;
   padding: 10px 20px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   font-weight: 500;
   margin-top: 8px;
@@ -67,6 +67,20 @@ h2 {
 
 .botao-primario:hover {
   background: var(--cor-primaria-hover);
+}
+
+.botao-primario,
+.botao-secundario,
+.botao-remover,
+.botao-detalhes {
+  transition: transform 80ms ease, background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.botao-primario:active,
+.botao-secundario:active,
+.botao-remover:active,
+.botao-detalhes:active {
+  transform: scale(0.97);
 }
 
 .confirmacao {
@@ -77,8 +91,10 @@ h2 {
 .lista-titulo {
   margin-top: 48px;
   margin-bottom: 12px;
+  font-family: var(--fonte-texto);
   font-size: 14px;
   font-weight: 500;
+  letter-spacing: normal;
   color: var(--cor-texto-suave);
 }
 
@@ -114,7 +130,7 @@ h2 {
   border: 1px solid var(--cor-erro);
   color: var(--cor-erro);
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 13px;
 }
 
@@ -126,23 +142,99 @@ h2 {
 .tela-login {
   min-height: 100vh;
   display: flex;
+}
+
+.login-identidade {
+  position: relative;
+  z-index: 0;
+  overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  background: var(--cor-primaria);
+  color: #C9D6D1;
+  padding: 64px;
+}
+
+.login-identidade-marca-dagua {
+  position: absolute;
+  z-index: -1;
+  bottom: -70px;
+  right: -70px;
+  width: 360px;
+  height: 360px;
+  color: var(--cor-acento);
+  opacity: 0.12;
+}
+
+.login-identidade-icone {
+  width: 56px;
+  height: 56px;
+  color: var(--cor-acento);
+  opacity: 0.9;
+}
+
+.login-identidade h1 {
+  font-size: 32px;
+  color: #FBFAF7;
+}
+
+.login-identidade p {
+  max-width: 34ch;
+  font-size: 15px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.login-formulario-area {
+  flex: 1;
+  display: flex;
   align-items: center;
   justify-content: center;
+  padding: 24px;
   background: var(--cor-fundo);
 }
 
 .cartao-login {
-  background: var(--cor-painel);
-  border: 1px solid var(--cor-borda);
-  border-radius: 6px;
-  padding: 40px;
+  background: transparent;
+  border: none;
+  padding: 0;
   width: 100%;
   max-width: 340px;
 }
 
 .login-titulo {
+  position: relative;
+  padding-left: 14px;
   font-size: 22px;
   margin-bottom: 4px;
+}
+
+.login-titulo::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.1em;
+  bottom: 0.1em;
+  width: 3px;
+  background: var(--cor-acento);
+}
+
+@media (max-width: 760px) {
+  .tela-login {
+    flex-direction: column;
+  }
+
+  .login-identidade {
+    padding: 40px 32px;
+  }
+
+  .login-formulario-area {
+    padding: 40px 32px;
+    flex: none;
+  }
 }
 
 .erro-login {
@@ -168,13 +260,13 @@ h2 {
   flex-direction: column;
   gap: 4px;
   font-size: 12px;
-  color: #9FB0C2;
+  color: #9FAEAA;
   margin: 20px 0 8px;
 }
 
 .seletor-condominio select {
   padding: 8px 10px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   border: 1px solid rgba(255, 255, 255, 0.2);
   background: rgba(255, 255, 255, 0.06);
   color: #FFFFFF;
@@ -182,7 +274,7 @@ h2 {
 }
 
 .seletor-condominio select option {
-  color: #1B1E1A;
+  color: var(--cor-texto);
 }
 
 .botao-secundario {
@@ -190,7 +282,7 @@ h2 {
   border: 1px solid var(--cor-borda);
   color: var(--cor-texto);
   padding: 9px 16px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
 }
 
@@ -200,11 +292,13 @@ h2 {
 
 .nav-sair {
   margin-top: auto;
-  color: #E3B9AC;
+  border: 1px solid rgba(224, 183, 168, 0.35);
+  color: #E0B7A8;
 }
 
 .nav-sair:hover {
-  background: rgba(179, 67, 43, 0.25);
+  background: rgba(166, 67, 46, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
   color: #FFFFFF;
 }
 
@@ -214,7 +308,7 @@ h2 {
   margin: 0;
   padding: 10px 12px;
   border: 1px dashed var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
 }
 
 .item-condominio-acoes {
@@ -242,20 +336,20 @@ h2 {
 
 .painel-fracao {
   padding: 14px 16px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   margin: 16px 0 32px;
   border: 1px solid transparent;
 }
 
 .painel-fracao.ok {
-  background: rgba(46, 125, 50, 0.08);
+  background: rgba(44, 74, 82, 0.08);
   border-color: var(--cor-primaria);
   color: var(--cor-primaria);
 }
 
 .painel-fracao.alerta {
-  background: rgba(179, 67, 43, 0.08);
+  background: rgba(166, 67, 46, 0.08);
   border-color: var(--cor-erro);
   color: var(--cor-erro);
 }
@@ -286,7 +380,7 @@ h2 {
   border: 1px solid var(--cor-primaria);
   color: var(--cor-primaria);
   padding: 6px 12px;
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 13px;
 }
 
@@ -298,7 +392,7 @@ h2 {
 .painel-unidade {
   background: var(--cor-painel);
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   padding: 20px;
   margin: 4px 0 16px;
   display: flex;
@@ -356,7 +450,7 @@ h2 {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   color: var(--cor-texto);
   background: var(--cor-painel);
@@ -396,8 +490,8 @@ h2 {
   margin: 12px 0 0;
   padding: 10px 14px;
   border: 1px solid var(--cor-erro);
-  border-radius: 4px;
-  background: rgba(179, 67, 43, 0.08);
+  border-radius: var(--raio);
+  background: rgba(166, 67, 46, 0.08);
   color: var(--cor-erro);
   font-size: 14px;
   line-height: 1.4;
@@ -444,6 +538,104 @@ h2 {
   font-weight: 500;
 }
 
+.abas-principal {
+  margin-bottom: 20px;
+}
+
+.abas-principal .aba {
+  font-size: 15px;
+  padding: 10px 18px;
+  font-weight: 500;
+}
+
+.abas-principal .aba.ativa {
+  font-weight: 600;
+}
+
+.historico-disclosure {
+  margin-top: 24px;
+  border-top: 1px solid var(--cor-borda);
+  padding-top: 4px;
+}
+
+.historico-disclosure summary {
+  cursor: pointer;
+  padding: 12px 0;
+  font-size: 14px;
+  color: var(--cor-primaria);
+  font-weight: 500;
+  list-style: none;
+}
+
+.historico-disclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.historico-disclosure summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: 6px;
+  transition: transform 0.15s ease;
+}
+
+.historico-disclosure[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.historico-disclosure summary:hover {
+  color: var(--cor-primaria-hover);
+}
+
+.historico-disclosure[open] summary {
+  border-bottom: 1px solid var(--cor-borda);
+  margin-bottom: 12px;
+}
+
+.historico-grade {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms ease;
+}
+
+.historico-disclosure[open] .historico-grade {
+  grid-template-rows: 1fr;
+}
+
+.historico-conteudo {
+  overflow: hidden;
+  min-height: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .historico-disclosure summary::before {
+    transition: none;
+  }
+
+  .historico-grade {
+    transition: none;
+  }
+
+  .modal-fundo,
+  .modal-cartao,
+  .aba-conteudo {
+    animation: none;
+  }
+
+  .botao-primario,
+  .botao-secundario,
+  .botao-remover,
+  .botao-detalhes {
+    transition: none;
+  }
+
+  .botao-primario:active,
+  .botao-secundario:active,
+  .botao-remover:active,
+  .botao-detalhes:active {
+    transform: none;
+  }
+}
+
 .subtitulo-lista {
   margin: 20px 0 8px;
   font-size: 14px;
@@ -458,7 +650,7 @@ h2 {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   color: var(--cor-texto);
   background: var(--cor-painel);
@@ -512,7 +704,7 @@ h2 {
   padding: 20px;
   background: var(--cor-painel);
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   max-width: 460px;
 }
 
@@ -557,7 +749,7 @@ h2 {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   color: var(--cor-texto);
   background: var(--cor-painel);
@@ -566,7 +758,7 @@ h2 {
 .tabela-dados-rolagem {
   overflow-x: auto;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
 }
 
 .tabela-dados {
@@ -650,7 +842,7 @@ h2 {
   height: 40px;
   padding: 0 12px;
   border: 1px solid var(--cor-borda);
-  border-radius: 4px;
+  border-radius: var(--raio);
   font-size: 14px;
   color: var(--cor-texto);
   background: var(--cor-painel);
@@ -681,7 +873,7 @@ h2 {
 .modal-cartao {
   background: var(--cor-painel);
   border: 1px solid var(--cor-borda);
-  border-radius: 6px;
+  border-radius: var(--raio);
   padding: 24px;
   width: 100%;
   max-width: 480px;
@@ -710,8 +902,39 @@ h2 {
   padding: 0 4px;
 }
 
+@keyframes modal-fundo-entrada {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modal-cartao-entrada {
+  from { opacity: 0; transform: scale(0.96) translateY(6px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.modal-fundo {
+  animation: modal-fundo-entrada 150ms ease-out;
+}
+
+.modal-cartao {
+  animation: modal-cartao-entrada 180ms ease-out;
+}
+
+@keyframes fade-entrada {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.aba-conteudo {
+  animation: fade-entrada 160ms ease-out;
+}
+
 .modal-fechar:hover {
   color: var(--cor-texto);
+}
+
+.modal-cartao-unidade {
+  max-width: 760px;
 }
 
 .botao-primario:disabled,
@@ -721,8 +944,20 @@ h2 {
 }
 
 .subtitulo-secao {
+  position: relative;
   margin-top: 24px;
   margin-bottom: 8px;
+  padding-left: 14px;
+}
+
+.subtitulo-secao::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.15em;
+  bottom: 0.15em;
+  width: 3px;
+  background: var(--cor-acento);
 }
 
 .cards-resumo {
@@ -737,7 +972,7 @@ h2 {
   flex-direction: column;
   gap: 4px;
   padding: 16px;
-  border: 1px solid #e0e0e0;
+  border: 1px solid var(--cor-borda);
   border-radius: 8px;
   min-width: 200px;
   flex: 1;
@@ -745,7 +980,7 @@ h2 {
 
 .card-resumo-titulo {
   font-size: 0.85rem;
-  color: #666;
+  color: var(--cor-texto-suave);
 }
 
 .card-resumo-valor {
@@ -754,5 +989,5 @@ h2 {
 
 .card-resumo-diferenca {
   font-size: 0.8rem;
-  color: #888;
+  color: var(--cor-texto-suave);
 }

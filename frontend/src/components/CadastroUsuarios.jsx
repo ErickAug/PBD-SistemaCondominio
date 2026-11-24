@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { criarUsuarioNoCondominio, listarUsuariosDoCondominio } from '../services/api.js'
+import TabelaDados from './TabelaDados.jsx'
 
 const PERFIS = [
   { valor: 'SINDICO', rotulo: 'Síndico' },
@@ -11,6 +12,21 @@ const PERFIS = [
 function rotuloDoPerfil(perfil) {
   return PERFIS.find((p) => p.valor === perfil)?.rotulo ?? perfil
 }
+
+const COLUNAS_USUARIOS = [
+  { chave: 'nome', titulo: 'Nome' },
+  { chave: 'usuario', titulo: 'Usuário (login)', renderizar: (item) => `@${item.usuario}` },
+  {
+    chave: 'contato',
+    titulo: 'Contato',
+    renderizar: (item) => item.contato || '—',
+  },
+  {
+    chave: 'perfilRotulo',
+    titulo: 'Perfil',
+    renderizar: (item) => <span className="selo selo-inativo">{item.perfilRotulo}</span>,
+  },
+]
 
 function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) {
   const perfisDisponiveis = perfisPermitidos
@@ -91,6 +107,11 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
   let tituloLista = `${usuarios.length} usuário(s) cadastrado(s) em ${condominioAtivo?.nome ?? 'este condomínio'}`
   if (carregandoLista) tituloLista = 'Carregando usuários...'
   else if (usuarios.length === 0) tituloLista = 'Nenhum usuário cadastrado neste condomínio ainda'
+
+  const usuariosParaTabela = usuarios.map((usuario) => ({
+    ...usuario,
+    perfilRotulo: rotuloDoPerfil(usuario.perfil),
+  }))
 
   return (
     <section>
@@ -173,22 +194,14 @@ function CadastroUsuarios({ condominios, condominioAtivoId, perfisPermitidos }) 
 
       <h3 className="lista-titulo">{tituloLista}</h3>
 
-      {erroLista && <p className="alerta-erro">{erroLista}</p>}
-
-      <ul className="lista-condominios">
-        {usuarios.map((usuario) => (
-          <li key={usuario.id} className="item-condominio">
-            <div>
-              <strong>{usuario.nome}</strong>
-              <p>
-                @{usuario.usuario}
-                {usuario.contato ? ` · ${usuario.contato}` : ''}
-              </p>
-            </div>
-            <span className="selo selo-inativo">{rotuloDoPerfil(usuario.perfil)}</span>
-          </li>
-        ))}
-      </ul>
+      <TabelaDados
+        colunas={COLUNAS_USUARIOS}
+        dados={usuariosParaTabela}
+        camposBusca={['nome', 'usuario', 'contato']}
+        buscaPlaceholder="Buscar por nome, usuário ou contato..."
+        mensagemVazia="Nenhum usuário cadastrado neste condomínio ainda."
+        mensagemErro={erroLista}
+      />
     </section>
   )
 }

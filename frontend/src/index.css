@@ -1,15 +1,16 @@
 :root {
-  --cor-fundo: #EEF1F5;
-  --cor-painel: #FFFFFF;
-  --cor-borda: #D6DCE5;
-  --cor-texto: #182430;
-  --cor-texto-suave: #5B6B7C;
-  --cor-primaria: #1E3A5F;
-  --cor-primaria-hover: #14283F;
-  --cor-acento: #3B82A0;
-  --cor-erro: #B3432B;
-  --fonte-titulo: 'Space Grotesk', sans-serif;
-  --fonte-texto: 'Inter', sans-serif;
+  --cor-fundo: #F7F5F0;
+  --cor-painel: #FBFAF7;
+  --cor-borda: #D8D3C7;
+  --cor-texto: #1B2430;
+  --cor-texto-suave: #5C6670;
+  --cor-primaria: #2C4A52;
+  --cor-primaria-hover: #1E363D;
+  --cor-acento: #C25B2E;
+  --cor-erro: #A6432E;
+  --fonte-titulo: 'Big Shoulders Display', sans-serif;
+  --fonte-texto: 'Source Sans 3', sans-serif;
+  --raio: 3px;
 }
 
 * {
@@ -28,8 +29,9 @@ h1,
 h2,
 h3 {
   font-family: var(--fonte-titulo);
+  font-weight: 700;
   margin: 0;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
 }
 
 button {
@@ -40,4 +42,13 @@ button {
 input,
 select {
   font-family: var(--fonte-texto);
+}
+
+/* Valores, horários e números de unidade leem como medida, não como texto corrido */
+.tabela-dados td,
+.card-resumo-valor,
+.item-condominio p,
+.resultado-placa h3,
+.total-despesas {
+  font-variant-numeric: tabular-nums;
 }

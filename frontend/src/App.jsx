@@ -15,6 +15,17 @@ import BuscaPlaca from './components/BuscaPlaca.jsx'
 import PortariaVisitas from './components/PortariaVisitas.jsx'
 import PortariaRegistros from './components/PortariaRegistros.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
+import {
+  IconeEmpresa,
+  IconePredio,
+  IconeUsuario,
+  IconeDespesa,
+  IconeBusca,
+  IconeRateio,
+  IconeCobranca,
+  IconeRelatorio,
+  IconeSair,
+} from './components/IconesMenu.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
 import './App.css'
 import './components/estilos.css'
@@ -28,6 +39,7 @@ function App() {
 
   const ehAdministradora = usuarioLogado?.perfil === 'administradora'
   const ehSindico = usuarioLogado?.perfil === 'sindico'
+  const ehPortaria = usuarioLogado?.perfil === 'portaria'
 
   useEffect(() => {
     if (!usuarioLogado || !ehAdministradora) return
@@ -44,7 +56,13 @@ function App() {
 
   function aoFazerLogin(usuario) {
     setUsuarioLogado(usuario)
-    setTelaAtual(usuario.perfil === 'sindico' ? 'unidades' : 'administradora')
+    if (usuario.perfil === 'sindico') {
+      setTelaAtual('unidades')
+    } else if (usuario.perfil === 'portaria') {
+      setTelaAtual('portariaVisitas')
+    } else {
+      setTelaAtual('administradora')
+    }
   }
 
   function sair() {
@@ -82,19 +100,22 @@ function App() {
               className={telaAtual === 'administradora' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('administradora')}
             >
-              Dados da administradora
+              <IconeEmpresa className="nav-icone" />
+              <span>Dados da administradora</span>
             </button>
             <button
               className={telaAtual === 'condominios' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('condominios')}
             >
-              Condomínios
+              <IconePredio className="nav-icone" />
+              <span>Condomínios</span>
             </button>
             <button
               className={telaAtual === 'usuarios' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('usuarios')}
             >
-              Usuários
+              <IconeUsuario className="nav-icone" />
+              <span>Usuários</span>
             </button>
           </nav>
         )}
@@ -105,53 +126,88 @@ function App() {
       className={telaAtual === 'unidades' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('unidades')}
     >
-      Blocos e unidades
+      <IconePredio className="nav-icone" />
+      <span>Blocos e unidades</span>
     </button>
     <button
       className={telaAtual === 'usuarios' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('usuarios')}
     >
-      Usuários
+      <IconeUsuario className="nav-icone" />
+      <span>Usuários</span>
     </button>
     <button
       className={telaAtual === 'despesas' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('despesas')}
     >
-      Despesas
+      <IconeDespesa className="nav-icone" />
+      <span>Despesas</span>
     </button>
     <button
       className={telaAtual === 'busca' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('busca')}
     >
-      Buscar por placa
+      <IconeBusca className="nav-icone" />
+      <span>Buscar por placa</span>
     </button>
     <button
       className={telaAtual === 'rateio' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('rateio')}
     >
-      Rateio do mês
+      <IconeRateio className="nav-icone" />
+      <span>Rateio do mês</span>
     </button>
     <button
       className={telaAtual === 'cobrancas' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('cobrancas')}
     >
-      Cobranças
+      <IconeCobranca className="nav-icone" />
+      <span>Cobranças</span>
     </button>
     <button
       className={telaAtual === 'prestacaoContas' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('prestacaoContas')}
     >
-      Prestação de contas
+      <IconeRelatorio className="nav-icone" />
+      <span>Prestação de contas</span>
     </button>
   </nav>
 )}
 
+        {ehPortaria && (
+          <nav className="sidebar-nav">
+            <button
+              className={telaAtual === 'portariaVisitas' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('portariaVisitas')}
+            >
+              <IconeUsuario className="nav-icone" />
+              <span>Visitas</span>
+            </button>
+            <button
+              className={telaAtual === 'portariaRegistros' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('portariaRegistros')}
+            >
+              <IconeRelatorio className="nav-icone" />
+              <span>Registros</span>
+            </button>
+            <button
+              className={telaAtual === 'portariaBusca' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('portariaBusca')}
+            >
+              <IconeBusca className="nav-icone" />
+              <span>Buscar por placa</span>
+            </button>
+          </nav>
+        )}
+
         <button className="nav-item nav-sair" onClick={sair}>
-          Sair
+          <IconeSair className="nav-icone" />
+          <span>Sair</span>
         </button>
       </aside>
 
       <main className="conteudo">
+        <div className="aba-conteudo" key={telaAtual}>
         {ehAdministradora ? (
           <>
             {telaAtual === 'administradora' && <CadastroAdministradora />}
@@ -201,11 +257,17 @@ function App() {
               <PaginaPrestacaoContas condominioId={usuarioLogado.condominioId} />
             )}
           </>
-        ) : usuarioLogado.perfil === 'portaria' ? (
+        ) : ehPortaria ? (
           <>
-            <BuscaPlaca condominioId={usuarioLogado.condominioId} />
-            <PortariaVisitas condominioId={usuarioLogado.condominioId} />
-            <PortariaRegistros condominioId={usuarioLogado.condominioId} />
+            {telaAtual === 'portariaVisitas' && (
+              <PortariaVisitas condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'portariaRegistros' && (
+              <PortariaRegistros condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'portariaBusca' && (
+              <BuscaPlaca condominioId={usuarioLogado.condominioId} />
+            )}
           </>
         ) : usuarioLogado.perfil === 'morador' ||
           (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
@@ -216,6 +278,7 @@ function App() {
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />
         )}
+        </div>
       </main>
     </div>
   )
