@@ -122,16 +122,12 @@ public class RateioService {
             Unidade unidade = unidades.get(i);
             boolean ultima = i == unidades.size() - 1;
 
-            BigDecimal fator = condominio.getModoRateio() == ModoRateio.IGUALITARIO
-                    ? BigDecimal.ONE.divide(BigDecimal.valueOf(unidades.size()), 10, RoundingMode.HALF_UP)
-                    : unidade.getFracaoIdeal().divide(CEM_POR_CENTO, 10, RoundingMode.HALF_UP);
-
             BigDecimal valorOrdinario = ultima
                     ? totalOrdinario.subtract(somaOrdinario)
-                    : totalOrdinario.multiply(fator).setScale(2, RoundingMode.DOWN);
+                    : calcularParte(totalOrdinario, unidade, unidades.size(), condominio.getModoRateio());
             BigDecimal valorExtraordinario = ultima
                     ? totalExtraordinario.subtract(somaExtraordinario)
-                    : totalExtraordinario.multiply(fator).setScale(2, RoundingMode.DOWN);
+                    : calcularParte(totalExtraordinario, unidade, unidades.size(), condominio.getModoRateio());
 
             somaOrdinario = somaOrdinario.add(valorOrdinario);
             somaExtraordinario = somaExtraordinario.add(valorExtraordinario);
@@ -147,6 +143,13 @@ public class RateioService {
         }
 
         return itens;
+    }
+
+    private BigDecimal calcularParte(BigDecimal total, Unidade unidade, int quantidadeDeUnidades, ModoRateio modo) {
+        if (modo == ModoRateio.IGUALITARIO) {
+            return total.divide(BigDecimal.valueOf(quantidadeDeUnidades), 2, RoundingMode.DOWN);
+        }
+        return total.multiply(unidade.getFracaoIdeal()).divide(CEM_POR_CENTO, 2, RoundingMode.DOWN);
     }
 
     private Usuario resolverResponsavelOrdinario(Unidade unidade, LocalDate competencia) {
