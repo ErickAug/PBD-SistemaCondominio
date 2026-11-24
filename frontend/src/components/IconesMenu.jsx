@@ -89,6 +89,16 @@ export function IconeLivro(props) {
   )
 }
 
+export function IconeAviso(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M3 7.3v3.4a1 1 0 0 0 1 1h1.3l5.3 3V3.3l-5.3 3H4a1 1 0 0 0-1 1z" pathLength="1" />
+      <path d="M12.6 6.6a3.1 3.1 0 0 1 0 4.8" pathLength="1" />
+      <path d="M14.5 4.7a5.6 5.6 0 0 1 0 8.6" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>
