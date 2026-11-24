@@ -947,3 +947,67 @@ export async function buscarUltimaPassagemTurno(condominioId) {
 
   return resposta.json()
 }
+
+export async function criarAviso(condominioId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/avisos`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível criar o aviso.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarHistoricoAvisos(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/avisos`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o histórico de avisos.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarLeiturasAviso(condominioId, avisoId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/avisos/${avisoId}/leituras`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as leituras do aviso.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarMeusAvisos(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/meus-avisos`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os avisos.')
+  }
+
+  return resposta.json()
+}
+
+export async function confirmarLeituraAviso(condominioId, avisoId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/meus-avisos/${avisoId}/leitura`,
+    { method: 'POST', headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível confirmar a leitura do aviso.')
+  }
+
+  return resposta.json()
+}

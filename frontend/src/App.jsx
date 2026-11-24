@@ -15,6 +15,8 @@ import BuscaPlaca from './components/BuscaPlaca.jsx'
 import PortariaVisitas from './components/PortariaVisitas.jsx'
 import PortariaRegistros from './components/PortariaRegistros.jsx'
 import LivroOcorrencias from './components/LivroOcorrencias.jsx'
+import Avisos from './components/Avisos.jsx'
+import MeusAvisos from './components/MeusAvisos.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import {
   IconeEmpresa,
@@ -26,6 +28,7 @@ import {
   IconeCobranca,
   IconeRelatorio,
   IconeLivro,
+  IconeAviso,
   IconeSair,
 } from './components/IconesMenu.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
@@ -180,6 +183,13 @@ function App() {
       <IconeLivro className="nav-icone" />
       <span>Livro de ocorrências</span>
     </button>
+    <button
+      className={telaAtual === 'avisos' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('avisos')}
+    >
+      <IconeAviso className="nav-icone" />
+      <span>Avisos</span>
+    </button>
   </nav>
 )}
 
@@ -275,6 +285,9 @@ function App() {
             {telaAtual === 'ocorrencias' && (
               <LivroOcorrencias condominioId={usuarioLogado.condominioId} somenteLeitura />
             )}
+            {telaAtual === 'avisos' && (
+              <Avisos condominioId={usuarioLogado.condominioId} />
+            )}
           </>
         ) : ehPortaria ? (
           <>
@@ -294,6 +307,7 @@ function App() {
         ) : usuarioLogado.perfil === 'morador' ||
           (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
           <>
+            <MeusAvisos condominioId={usuarioLogado.condominioId} />
             <MinhaUnidade usuarioLogado={usuarioLogado} />
             <PrestacaoContasUnidade condominioId={usuarioLogado.condominioId} />
           </>

@@ -1028,3 +1028,34 @@ h2 {
   font-size: 0.8rem;
   color: var(--cor-texto-suave);
 }
+.campo-texto-aviso {
+  flex-basis: 100%;
+}
+
+.campo-texto-aviso textarea {
+  width: 100%;
+}
+
+.painel-leituras-aviso h4 {
+  margin: 18px 0 6px;
+  font-size: 14px;
+}
+
+.lista-leituras-aviso {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.lista-leituras-aviso li {
+  padding: 8px 10px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+}
+
+.lista-leituras-aviso p {
+  margin: 4px 0 0;
+}
