@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 
-function Modal({ titulo, aoFechar, children }) {
+function Modal({ titulo, aoFechar, children, className = '' }) {
   useEffect(() => {
     function aoPressionarTecla(evento) {
       if (evento.key === 'Escape') aoFechar()
@@ -11,7 +11,7 @@ function Modal({ titulo, aoFechar, children }) {
 
   return (
     <div className="modal-fundo" onClick={aoFechar}>
-      <div className="modal-cartao" onClick={(evento) => evento.stopPropagation()}>
+      <div className={`modal-cartao ${className}`.trim()} onClick={(evento) => evento.stopPropagation()}>
         <div className="modal-cabecalho">
           <h2>{titulo}</h2>
           <button type="button" className="modal-fechar" onClick={aoFechar} aria-label="Fechar">

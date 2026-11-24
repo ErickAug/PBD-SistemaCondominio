@@ -8,6 +8,7 @@ import {
   listarUsuariosDoCondominio,
 } from '../services/api.js'
 import ListasDaUnidade from './ListasDaUnidade.jsx'
+import Modal from './Modal.jsx'
 
 const TIPOS_OCUPACAO = [
   { valor: 'PROPRIETARIO_MORANDO', rotulo: 'Proprietário morando' },
@@ -30,7 +31,7 @@ function hoje() {
   return `${d.getFullYear()}-${mes}-${dia}`
 }
 
-function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
+function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar, aoFechar }) {
   const [ocupacaoAtual, setOcupacaoAtual] = useState(null)
   const [historico, setHistorico] = useState([])
   const [usuarios, setUsuarios] = useState([])
@@ -50,6 +51,7 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
   const [dataConsulta, setDataConsulta] = useState('')
   const [resultadoConsulta, setResultadoConsulta] = useState(undefined)
   const [versaoOcupacao, setVersaoOcupacao] = useState(0)
+  const [abaPrincipal, setAbaPrincipal] = useState('geral')
 
   const carregar = useCallback(async () => {
     try {
@@ -198,23 +200,42 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
     }
   }
 
+  const titulo = `${nomeBloco} \u00b7 unidade ${unidade.numero}`
+
   if (carregando) {
     return (
-      <div className="painel-unidade">
+      <Modal titulo={titulo} aoFechar={aoFechar} className="modal-cartao-unidade">
         <p className="aviso-vazio">Carregando...</p>
-      </div>
+      </Modal>
     )
   }
 
   return (
-    <div className="painel-unidade">
+    <Modal titulo={titulo} aoFechar={aoFechar} className="modal-cartao-unidade">
       {erro && <p className="alerta-erro">{erro}</p>}
       {avisoUsuarios && <p className="aviso-vazio">{avisoUsuarios}</p>}
 
+      <div className="abas abas-principal">
+        <button
+          type="button"
+          className={abaPrincipal === 'geral' ? 'aba ativa' : 'aba'}
+          onClick={() => setAbaPrincipal('geral')}
+        >
+          Visão geral
+        </button>
+        <button
+          type="button"
+          className={abaPrincipal === 'pessoas' ? 'aba ativa' : 'aba'}
+          onClick={() => setAbaPrincipal('pessoas')}
+        >
+          Pessoas e acessos
+        </button>
+      </div>
+
+      {abaPrincipal === 'geral' && (
+        <div className="aba-conteudo" key="geral">
       <div className="secao-unidade">
-        <h4>
-          Situação atual — {nomeBloco}, unidade {unidade.numero}
-        </h4>
+        <h4>Situação atual</h4>
         <div className="papeis">
           <div className="papel">
             <span className="papel-rotulo">Situação</span>
@@ -334,76 +355,89 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar }) {
         {erroOcupacao && <p className="alerta-erro">{erroOcupacao}</p>}
       </div>
 
-      <div className="secao-unidade">
-        <h4>Linha do tempo</h4>
-        {historico.length === 0 ? (
-          <p className="aviso-vazio">Nenhuma ocupação registrada ainda.</p>
-        ) : (
-          <ol className="linha-do-tempo">
-            {historico.map((o, i) => {
-              const fim = i === 0 ? null : historico[i - 1].dataEntrada
-              return (
-                <li key={o.id} className={i === 0 ? 'item-tempo atual' : 'item-tempo'}>
-                  <strong>{rotuloDoTipo(o.tipo)}</strong>
-                  <span>{o.ocupanteNome ?? 'Ninguém'}</span>
-                  <span className="periodo">
-                    {formatarData(o.dataEntrada)}{' '}
-                    {fim ? `até ${formatarData(fim)}` : '· em andamento'}
-                  </span>
-                </li>
-              )
-            })}
-          </ol>
-        )}
-      </div>
+      <details className="historico-disclosure">
+        <summary>Ver histórico de ocupação</summary>
 
-      <div className="secao-unidade">
-        <h4>Quem ocupava em uma data</h4>
-        <form onSubmit={consultar} className="formulario-inline">
-          <label className="campo">
-            <span>Data</span>
-            <input
-              type="date"
-              value={dataConsulta}
-              onChange={(e) => {
-                setDataConsulta(e.target.value)
-                setResultadoConsulta(undefined)
-                setErroConsulta('')
-              }}
-              required
-            />
-          </label>
-          <button type="submit" className="botao-primario">
-            Consultar
-          </button>
-        </form>
+        <div className="historico-grade">
+        <div className="historico-conteudo">
 
-        {erroConsulta && <p className="alerta-erro">{erroConsulta}</p>}
-        {resultadoConsulta === null && (
-          <p className="aviso-vazio resultado-consulta">Nenhum registro cobre essa data.</p>
-        )}
-        {resultadoConsulta && (
-          <p className="resultado-consulta">
-            Em {formatarData(dataConsulta)}: <strong>{rotuloDoTipo(resultadoConsulta.tipo)}</strong>
-            {resultadoConsulta.ocupanteNome ? ` — ${resultadoConsulta.ocupanteNome}` : ''}
-          </p>
-        )}
-      </div>
+        <div className="secao-unidade">
+          <h4>Linha do tempo</h4>
+          {historico.length === 0 ? (
+            <p className="aviso-vazio">Nenhuma ocupação registrada ainda.</p>
+          ) : (
+            <ol className="linha-do-tempo">
+              {historico.map((o, i) => {
+                const fim = i === 0 ? null : historico[i - 1].dataEntrada
+                return (
+                  <li key={o.id} className={i === 0 ? 'item-tempo atual' : 'item-tempo'}>
+                    <strong>{rotuloDoTipo(o.tipo)}</strong>
+                    <span>{o.ocupanteNome ?? 'Ninguém'}</span>
+                    <span className="periodo">
+                      {formatarData(o.dataEntrada)}{' '}
+                      {fim ? `até ${formatarData(fim)}` : '· em andamento'}
+                    </span>
+                  </li>
+                )
+              })}
+            </ol>
+          )}
+        </div>
 
-      <div className="secao-unidade">
-        <h4>Quem mora e quem entra</h4>
-        <ListasDaUnidade
-          condominioId={condominioId}
-          blocoId={unidade.blocoId}
-          unidadeId={unidade.id}
-          usuarios={usuarios}
-          versao={versaoOcupacao}
-          ocupacaoAtual={ocupacaoAtual}
-          aoSairOcupante={registrarSaidaDoInquilino}
-          podeGerenciarVagas
-        />
-      </div>
-    </div>
+        <div className="secao-unidade">
+          <h4>Quem ocupava em uma data</h4>
+          <form onSubmit={consultar} className="formulario-inline">
+            <label className="campo">
+              <span>Data</span>
+              <input
+                type="date"
+                value={dataConsulta}
+                onChange={(e) => {
+                  setDataConsulta(e.target.value)
+                  setResultadoConsulta(undefined)
+                  setErroConsulta('')
+                }}
+                required
+              />
+            </label>
+            <button type="submit" className="botao-primario">
+              Consultar
+            </button>
+          </form>
+
+          {erroConsulta && <p className="alerta-erro">{erroConsulta}</p>}
+          {resultadoConsulta === null && (
+            <p className="aviso-vazio resultado-consulta">Nenhum registro cobre essa data.</p>
+          )}
+          {resultadoConsulta && (
+            <p className="resultado-consulta">
+              Em {formatarData(dataConsulta)}: <strong>{rotuloDoTipo(resultadoConsulta.tipo)}</strong>
+              {resultadoConsulta.ocupanteNome ? ` — ${resultadoConsulta.ocupanteNome}` : ''}
+            </p>
+          )}
+        </div>
+
+        </div>
+        </div>
+      </details>
+        </div>
+      )}
+
+      {abaPrincipal === 'pessoas' && (
+        <div className="aba-conteudo secao-unidade" key="pessoas">
+          <ListasDaUnidade
+            condominioId={condominioId}
+            blocoId={unidade.blocoId}
+            unidadeId={unidade.id}
+            usuarios={usuarios}
+            versao={versaoOcupacao}
+            ocupacaoAtual={ocupacaoAtual}
+            aoSairOcupante={registrarSaidaDoInquilino}
+            podeGerenciarVagas
+          />
+        </div>
+      )}
+    </Modal>
   )
 }
 
