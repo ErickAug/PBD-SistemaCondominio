@@ -40,6 +40,43 @@ h2 {
   border-color: var(--cor-primaria);
 }
 
+.campo textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--cor-borda);
+  border-radius: var(--raio);
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--cor-texto);
+  background: var(--cor-painel);
+  resize: vertical;
+}
+
+.campo textarea:focus {
+  outline: 2px solid var(--cor-primaria);
+  outline-offset: 1px;
+  border-color: var(--cor-primaria);
+}
+
+.formulario-correcao {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 220px;
+}
+
+.anotacao-correcao {
+  margin: 4px 0 0;
+}
+
+.painel-fracao ul {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.painel-fracao p {
+  margin: 6px 0 0;
+}
+
 .linha-dois-campos {
   display: flex;
   gap: 12px;

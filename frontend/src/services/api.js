@@ -850,3 +850,100 @@ export async function filtrarHistoricoAcessos(condominioId, filtros = {}) {
 
   return resposta.json()
 }
+
+
+export async function registrarOcorrencia(condominioId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/portaria/ocorrencias`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a ocorrência.')
+  }
+
+  return resposta.json()
+}
+
+export async function corrigirOcorrencia(condominioId, ocorrenciaId, texto) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/ocorrencias/${ocorrenciaId}/correcao`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+      body: JSON.stringify({ texto }),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a correção.')
+  }
+
+  return resposta.json()
+}
+
+export async function resolverOcorrencia(condominioId, ocorrenciaId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/ocorrencias/${ocorrenciaId}/resolver`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível marcar a ocorrência como resolvida.')
+  }
+
+  return resposta.json()
+}
+
+export async function filtrarOcorrencias(condominioId, filtros = {}) {
+  const parametros = new URLSearchParams()
+  if (filtros.inicio) parametros.set('inicio', filtros.inicio)
+  if (filtros.fim) parametros.set('fim', filtros.fim)
+  if (filtros.tipo) parametros.set('tipo', filtros.tipo)
+  if (filtros.unidadeId) parametros.set('unidadeId', filtros.unidadeId)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/portaria/ocorrencias${query}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o livro de ocorrências.')
+  }
+
+  return resposta.json()
+}
+
+export async function encerrarTurno(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/portaria/turnos/encerrar`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível encerrar o turno.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarUltimaPassagemTurno(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/portaria/turnos/ultima-pendencia`, {
+    headers: headersAutenticados(),
+  })
+
+  if (resposta.status === 204) {
+    return null
+  }
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar a última passagem de turno.')
+  }
+
+  return resposta.json()
+}

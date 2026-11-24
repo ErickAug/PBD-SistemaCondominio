@@ -80,6 +80,15 @@ export function IconeRelatorio(props) {
   )
 }
 
+export function IconeLivro(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M9 4.2c-1-.9-2.4-1.4-4.2-1.4-.7 0-1.3.6-1.3 1.3v8.9c0 .7.6 1.1 1.3 1.1 1.8 0 3.2.5 4.2 1.4" pathLength="1" />
+      <path d="M9 4.2c1-.9 2.4-1.4 4.2-1.4.7 0 1.3.6 1.3 1.3v8.9c0 .7-.6 1.1-1.3 1.1-1.8 0-3.2.5-4.2 1.4V4.2z" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>
