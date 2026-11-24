@@ -14,6 +14,7 @@ import MinhaUnidade from './components/MinhaUnidade.jsx'
 import BuscaPlaca from './components/BuscaPlaca.jsx'
 import PortariaVisitas from './components/PortariaVisitas.jsx'
 import PortariaRegistros from './components/PortariaRegistros.jsx'
+import LivroOcorrencias from './components/LivroOcorrencias.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import {
   IconeEmpresa,
@@ -24,6 +25,7 @@ import {
   IconeRateio,
   IconeCobranca,
   IconeRelatorio,
+  IconeLivro,
   IconeSair,
 } from './components/IconesMenu.jsx'
 import { buscarCondominios, logout as apiLogout } from './services/api.js'
@@ -59,7 +61,7 @@ function App() {
     if (usuario.perfil === 'sindico') {
       setTelaAtual('unidades')
     } else if (usuario.perfil === 'portaria') {
-      setTelaAtual('portariaVisitas')
+      setTelaAtual('portariaOcorrencias')
     } else {
       setTelaAtual('administradora')
     }
@@ -171,11 +173,25 @@ function App() {
       <IconeRelatorio className="nav-icone" />
       <span>Prestação de contas</span>
     </button>
+    <button
+      className={telaAtual === 'ocorrencias' ? 'nav-item ativo' : 'nav-item'}
+      onClick={() => setTelaAtual('ocorrencias')}
+    >
+      <IconeLivro className="nav-icone" />
+      <span>Livro de ocorrências</span>
+    </button>
   </nav>
 )}
 
         {ehPortaria && (
           <nav className="sidebar-nav">
+            <button
+              className={telaAtual === 'portariaOcorrencias' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('portariaOcorrencias')}
+            >
+              <IconeLivro className="nav-icone" />
+              <span>Livro de ocorrências</span>
+            </button>
             <button
               className={telaAtual === 'portariaVisitas' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('portariaVisitas')}
@@ -256,9 +272,15 @@ function App() {
             {telaAtual === 'prestacaoContas' && (
               <PaginaPrestacaoContas condominioId={usuarioLogado.condominioId} />
             )}
+            {telaAtual === 'ocorrencias' && (
+              <LivroOcorrencias condominioId={usuarioLogado.condominioId} somenteLeitura />
+            )}
           </>
         ) : ehPortaria ? (
           <>
+            {telaAtual === 'portariaOcorrencias' && (
+              <LivroOcorrencias condominioId={usuarioLogado.condominioId} />
+            )}
             {telaAtual === 'portariaVisitas' && (
               <PortariaVisitas condominioId={usuarioLogado.condominioId} />
             )}
