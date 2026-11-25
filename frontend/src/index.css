@@ -13,6 +13,14 @@
   --cor-erro-tenue: rgba(166, 67, 46, 0.08);
   --cor-destaque: #2C4A52;
   --cor-destaque-hover: #1E363D;
+  --login-scrim: linear-gradient(100deg, rgba(20, 30, 35, 0.74) 0%, rgba(20, 30, 35, 0.42) 45%, rgba(20, 30, 35, 0.68) 100%);
+  --login-cartao-fundo: rgba(247, 245, 240, 0.16);
+  --login-cartao-borda: rgba(247, 245, 240, 0.32);
+  --login-cartao-sombra: rgba(10, 14, 16, 0.35);
+  --login-texto: #FBFAF7;
+  --login-texto-suave: #C9D6D1;
+  --login-input-fundo: rgba(247, 245, 240, 0.12);
+  --login-input-borda: rgba(247, 245, 240, 0.32);
   --fonte-titulo: 'Big Shoulders Display', sans-serif;
   --fonte-texto: 'Source Sans 3', sans-serif;
   --raio: 3px;
@@ -33,6 +41,14 @@
   --cor-erro-tenue: rgba(217, 115, 89, 0.18);
   --cor-destaque: #7FB4C2;
   --cor-destaque-hover: #9CC6D1;
+  --login-scrim: linear-gradient(100deg, rgba(8, 11, 13, 0.82) 0%, rgba(8, 11, 13, 0.52) 45%, rgba(8, 11, 13, 0.78) 100%);
+  --login-cartao-fundo: rgba(20, 24, 27, 0.45);
+  --login-cartao-borda: rgba(231, 228, 220, 0.18);
+  --login-cartao-sombra: rgba(0, 0, 0, 0.5);
+  --login-texto: #F2F0EA;
+  --login-texto-suave: #B8C2C6;
+  --login-input-fundo: rgba(8, 11, 13, 0.4);
+  --login-input-borda: rgba(231, 228, 220, 0.22);
 }
 
 * {
