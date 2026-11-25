@@ -50,6 +50,7 @@ public class RateioController {
 
         List<RateioUnidadeResponseDTO> unidades = itens.stream().map(item -> new RateioUnidadeResponseDTO(
                 item.getUnidade().getId(), item.getUnidade().getNumero(),
+                item.getUnidade().getAndar(), item.getUnidade().getBloco().getNome(),
                 item.getValorOrdinario(), item.getValorExtraordinario(), item.getValorTotal(),
                 item.getResponsavelOrdinario() != null ? item.getResponsavelOrdinario().getNome() : null,
                 item.getResponsavelExtraordinario() != null ? item.getResponsavelExtraordinario().getNome() : null

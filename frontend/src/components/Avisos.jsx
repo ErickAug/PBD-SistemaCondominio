@@ -21,7 +21,8 @@ function rotuloAlcance(valor) {
 
 function formatarData(data) {
   if (!data) return ''
-  return new Date(data).toLocaleDateString('pt-BR')
+  const [ano, mes, dia] = data.split('-')
+  return `${dia}/${mes}/${ano}`
 }
 
 function formatarDataHora(dataHora) {
@@ -198,7 +199,7 @@ function Avisos({ condominioId }) {
             <span>Unidade</span>
             <select name="unidadeId" value={form.unidadeId} onChange={atualizarCampo} disabled={!form.blocoId}>
               <option value="">Selecione</option>
-              {unidades.map((u) => (<option key={u.id} value={u.id}>{u.numero}</option>))}
+              {unidades.map((u) => (<option key={u.id} value={u.id}>{u.numero} (andar {u.andar})</option>))}
             </select>
           </label>
         )}

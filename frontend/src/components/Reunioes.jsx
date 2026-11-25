@@ -359,7 +359,7 @@ function Reunioes({ condominioId }) {
                 <ul className="lista-leituras-aviso">
                   {detalhe.presencas.map((p) => (
                     <li key={p.id}>
-                      {p.blocoNome}, {p.unidadeNumero} — {p.compareceu}
+                      {p.blocoNome}, {p.unidadeNumero} (andar {p.unidadeAndar}) — {p.compareceu}
                     </li>
                   ))}
                 </ul>
@@ -385,7 +385,7 @@ function Reunioes({ condominioId }) {
                         disabled={!formPresenca.blocoId}
                       >
                         <option value="">Selecione</option>
-                        {unidades.map((u) => (<option key={u.id} value={u.id}>{u.numero}</option>))}
+                        {unidades.map((u) => (<option key={u.id} value={u.id}>{u.numero} (andar {u.andar})</option>))}
                       </select>
                     </label>
                     <label className="campo">

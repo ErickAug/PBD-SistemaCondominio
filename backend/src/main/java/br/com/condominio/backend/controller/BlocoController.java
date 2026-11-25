@@ -42,11 +42,11 @@ public class BlocoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponseDTO(salvo));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
     @GetMapping
     public ResponseEntity<List<BlocoResponseDTO>> listar(@PathVariable Long condominioId,
                                                          @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
-        tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
+        tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
 
         List<BlocoResponseDTO> lista = blocoService.listarPorCondominio(condominioId)
                 .stream()

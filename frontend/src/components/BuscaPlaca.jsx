@@ -68,7 +68,7 @@ function BuscaPlaca({ condominioId }) {
             <div className="papel">
               <span className="papel-rotulo">Unidade</span>
               <strong>
-                {resultado.bloco}, unidade {resultado.unidadeNumero}
+                {resultado.bloco}, unidade {resultado.unidadeNumero} (andar {resultado.unidadeAndar})
               </strong>
             </div>
             <div className="papel">

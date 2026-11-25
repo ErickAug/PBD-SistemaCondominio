@@ -8,7 +8,7 @@ function SeletorUnidade({ unidades, unidadeAtivaId, aoTrocar }) {
       >
         {unidades.map((unidade) => (
           <option key={unidade.unidadeId} value={unidade.unidadeId}>
-            {unidade.blocoNome}, {unidade.unidadeNumero}
+            {unidade.blocoNome}, {unidade.unidadeNumero} (andar {unidade.unidadeAndar})
           </option>
         ))}
       </select>

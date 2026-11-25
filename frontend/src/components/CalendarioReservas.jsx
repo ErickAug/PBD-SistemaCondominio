@@ -28,7 +28,7 @@ function mesAtual() {
   return `${hoje.getFullYear()}-${String(hoje.getMonth() + 1).padStart(2, '0')}`
 }
 
-function CalendarioReservas({ condominioId }) {
+function CalendarioReservas({ condominioId, refreshKey }) {
   const [areas, setAreas] = useState([])
   const [mes, setMes] = useState(mesAtual())
   const [areaComumId, setAreaComumId] = useState('')
@@ -47,7 +47,7 @@ function CalendarioReservas({ condominioId }) {
       .then(setCalendario)
       .catch((e) => { setErro(e.message); setCalendario([]) })
       .finally(() => setCarregando(false))
-  }, [condominioId, mes, areaComumId])
+  }, [condominioId, mes, areaComumId, refreshKey])
 
   useEffect(() => {
     carregar()
