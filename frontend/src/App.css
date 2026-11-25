@@ -12,7 +12,70 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  overflow: hidden;
+  transition: width 220ms ease, padding 220ms ease;
 }
+
+.sidebar.colapsada {
+  width: 72px;
+  padding: 32px 12px;
+}
+
+.sidebar.colapsada .sidebar-cabecalho {
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sidebar.colapsada .sidebar-titulo,
+.sidebar.colapsada .sidebar-subtitulo,
+.sidebar.colapsada .seletor-condominio {
+  display: none;
+}
+
+.sidebar.colapsada .nav-item {
+  justify-content: center;
+  padding: 10px 0;
+}
+
+.sidebar.colapsada .nav-item span {
+  display: none;
+}
+
+.botao-colapsar svg {
+  transition: transform 180ms ease;
+}
+
+.sidebar.colapsada .botao-colapsar svg {
+  transform: rotate(180deg);
+}
+
+@keyframes cascata-texto {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.sidebar-nav .nav-item span {
+  animation: cascata-texto 260ms ease both;
+}
+
+.sidebar-nav .nav-item:nth-child(1) span { animation-delay: 0ms; }
+.sidebar-nav .nav-item:nth-child(2) span { animation-delay: 30ms; }
+.sidebar-nav .nav-item:nth-child(3) span { animation-delay: 60ms; }
+.sidebar-nav .nav-item:nth-child(4) span { animation-delay: 90ms; }
+.sidebar-nav .nav-item:nth-child(5) span { animation-delay: 120ms; }
+.sidebar-nav .nav-item:nth-child(6) span { animation-delay: 150ms; }
+.sidebar-nav .nav-item:nth-child(7) span { animation-delay: 180ms; }
+.sidebar-nav .nav-item:nth-child(8) span { animation-delay: 210ms; }
+.sidebar-nav .nav-item:nth-child(9) span { animation-delay: 240ms; }
+.sidebar-nav .nav-item:nth-child(10) span { animation-delay: 270ms; }
+.sidebar-nav .nav-item:nth-child(11) span { animation-delay: 300ms; }
+.sidebar-nav .nav-item:nth-child(12) span { animation-delay: 330ms; }
 
 .sidebar-cabecalho {
   display: flex;
@@ -109,6 +172,18 @@
   .nav-item:hover .nav-icone path,
   .nav-item:hover .nav-icone rect,
   .nav-item:hover .nav-icone circle {
+    animation: none;
+  }
+
+  .sidebar {
+    transition: none;
+  }
+
+  .botao-colapsar svg {
+    transition: none;
+  }
+
+  .sidebar-nav .nav-item span {
     animation: none;
   }
 }
