@@ -1059,3 +1059,24 @@ h2 {
 .lista-leituras-aviso p {
   margin: 4px 0 0;
 }
+
+.campo-descricao-ocorrencia {
+  flex-basis: 100%;
+}
+
+.campo-descricao-ocorrencia textarea {
+  width: 100%;
+}
+
+.campo-filtro-situacao {
+  max-width: 220px;
+  margin-bottom: 16px;
+}
+
+.foto-ocorrencia {
+  max-width: 100%;
+  max-height: 320px;
+  border-radius: var(--raio);
+  border: 1px solid var(--cor-borda);
+  margin: 10px 0;
+}

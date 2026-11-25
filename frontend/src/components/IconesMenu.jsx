@@ -99,6 +99,15 @@ export function IconeAviso(props) {
   )
 }
 
+export function IconeChamado(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M2.5 4.5h13a1 1 0 0 1 1 1v6.4a1 1 0 0 1-1 1H8.2L4.8 15v-2.1H2.5a1 1 0 0 1-1-1V5.5a1 1 0 0 1 1-1z" pathLength="1" />
+      <path d="M9 7.3v2.6M9 11.3v.1" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>
