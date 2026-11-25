@@ -3,22 +3,29 @@ package br.com.condominio.backend.service;
 import br.com.condominio.backend.dto.BlocoFinanceiroDTO;
 import br.com.condominio.backend.dto.DespesaPorCategoriaDTO;
 import br.com.condominio.backend.dto.RelatorioPeriodoDTO;
+import br.com.condominio.backend.model.enums.TipoDespesa;
 import br.com.condominio.backend.repository.CobrancaRepository;
+import br.com.condominio.backend.repository.DespesaRepository;
 import br.com.condominio.backend.repository.ParcelaDespesaRepository;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 @Service
 public class RelatorioService {
 
+    private final DespesaRepository despesaRepository;
     private final ParcelaDespesaRepository parcelaDespesaRepository;
     private final CobrancaRepository cobrancaRepository;
 
-    public RelatorioService(ParcelaDespesaRepository parcelaDespesaRepository,
+    public RelatorioService(DespesaRepository despesaRepository,
+                             ParcelaDespesaRepository parcelaDespesaRepository,
                              CobrancaRepository cobrancaRepository) {
+        this.despesaRepository = despesaRepository;
         this.parcelaDespesaRepository = parcelaDespesaRepository;
         this.cobrancaRepository = cobrancaRepository;
     }
@@ -27,10 +34,21 @@ public class RelatorioService {
         LocalDate inicioMes = competencia.withDayOfMonth(1);
         LocalDate fimMes = inicioMes.plusMonths(1).minusDays(1);
 
-        List<DespesaPorCategoriaDTO> despesasPorCategoria = parcelaDespesaRepository
+        // Despesas ORDINARIA nao geram parcela (ParcelaDespesa so existe para EXTRAORDINARIA),
+        // entao precisam ser somadas direto da despesa; sem isso elas nunca apareciam no relatorio.
+        Map<String, BigDecimal> totalPorCategoria = new TreeMap<>();
+
+        despesaRepository
+                .somarPorCategoria(condominioId, inicioMes, fimMes, TipoDespesa.ORDINARIA)
+                .forEach(p -> totalPorCategoria.merge(p.getCategoria(), p.getTotal(), BigDecimal::add));
+
+        parcelaDespesaRepository
                 .somarPorCategoria(condominioId, inicioMes)
+                .forEach(p -> totalPorCategoria.merge(p.getCategoria(), p.getTotal(), BigDecimal::add));
+
+        List<DespesaPorCategoriaDTO> despesasPorCategoria = totalPorCategoria.entrySet()
                 .stream()
-                .map(p -> new DespesaPorCategoriaDTO(p.getCategoria(), p.getTotal()))
+                .map(entrada -> new DespesaPorCategoriaDTO(entrada.getKey(), entrada.getValue()))
                 .toList();
 
         BigDecimal totalDespesa = despesasPorCategoria.stream()

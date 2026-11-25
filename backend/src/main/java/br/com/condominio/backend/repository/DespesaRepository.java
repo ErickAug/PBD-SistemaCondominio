@@ -40,4 +40,18 @@ public interface DespesaRepository extends JpaRepository<Despesa, Long> {
                             @Param("dataFim") LocalDate dataFim,
                             @Param("categoria") String categoria,
                             @Param("tipo") TipoDespesa tipo);
+
+    @Query("""
+            SELECT d.categoria AS categoria, COALESCE(SUM(d.valor), 0) AS total
+            FROM Despesa d
+            WHERE d.condominio.id = :condominioId
+            AND d.tipo = :tipo
+            AND d.data BETWEEN :dataInicio AND :dataFim
+            GROUP BY d.categoria
+            ORDER BY d.categoria ASC
+            """)
+    List<CategoriaTotalProjection> somarPorCategoria(@Param("condominioId") Long condominioId,
+                                                       @Param("dataInicio") LocalDate dataInicio,
+                                                       @Param("dataFim") LocalDate dataFim,
+                                                       @Param("tipo") TipoDespesa tipo);
 }
