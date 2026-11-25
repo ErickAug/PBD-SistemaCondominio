@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 @Entity
 @Table(
         name = "unidades",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"numero", "bloco_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"numero", "andar", "bloco_id"})
 )
 @Getter
 @Setter
@@ -37,8 +37,8 @@ public class Unidade {
     @Column(nullable = false)
     private Integer andar;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal area; // BigDecimal para evitar erros de arredondamentos
+    @Column(nullable = true, precision = 10, scale = 2)
+    private BigDecimal area; // BigDecimal para evitar erros de arredondamentos; opcional, pois o sindico nem sempre sabe o valor exato
 
     @Column(name = "fracao_ideal", nullable = false, precision = 7, scale = 4)
     private BigDecimal fracaoIdeal;

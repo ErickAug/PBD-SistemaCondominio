@@ -10,7 +10,7 @@ import java.util.List;
 
 public interface UnidadeRepository extends JpaRepository<Unidade, Long> {
 
-    boolean existsByNumeroAndBlocoId(String numero, Long blocoId);
+    boolean existsByNumeroAndAndarAndBlocoId(String numero, Integer andar, Long blocoId);
 
     List<Unidade> findByBlocoId(Long blocoId);
 
