@@ -1011,3 +1011,83 @@ export async function confirmarLeituraAviso(condominioId, avisoId) {
 
   return resposta.json()
 }
+
+export async function abrirOcorrenciaMorador(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/ocorrencias`,
+    { method: 'POST', headers: headersAutenticados(), body: JSON.stringify(dados) }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a ocorrência.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarOcorrenciasDaUnidade(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/ocorrencias`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as ocorrências.')
+  }
+
+  return resposta.json()
+}
+
+export async function detalharOcorrenciaDaUnidade(condominioId, blocoId, unidadeId, ocorrenciaId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/ocorrencias/${ocorrenciaId}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os detalhes da ocorrência.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarFilaOcorrenciasMorador(condominioId, situacao) {
+  const parametros = new URLSearchParams()
+  if (situacao) parametros.set('situacao', situacao)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/ocorrencias${query}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar a fila de ocorrências.')
+  }
+
+  return resposta.json()
+}
+
+export async function detalharOcorrenciaMorador(condominioId, ocorrenciaId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/ocorrencias/${ocorrenciaId}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar os detalhes da ocorrência.')
+  }
+
+  return resposta.json()
+}
+
+export async function responderOcorrenciaMorador(condominioId, ocorrenciaId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/ocorrencias/${ocorrenciaId}/resposta`,
+    { method: 'POST', headers: headersAutenticados(), body: JSON.stringify(dados) }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível responder a ocorrência.')
+  }
+
+  return resposta.json()
+}
