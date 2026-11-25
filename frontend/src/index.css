@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --cor-fundo: #F7F5F0;
   --cor-painel: #FBFAF7;
   --cor-borda: #D8D3C7;
@@ -8,9 +9,30 @@
   --cor-primaria-hover: #1E363D;
   --cor-acento: #C25B2E;
   --cor-erro: #A6432E;
+  --cor-primaria-tenue: rgba(44, 74, 82, 0.08);
+  --cor-erro-tenue: rgba(166, 67, 46, 0.08);
+  --cor-destaque: #2C4A52;
+  --cor-destaque-hover: #1E363D;
   --fonte-titulo: 'Big Shoulders Display', sans-serif;
   --fonte-texto: 'Source Sans 3', sans-serif;
   --raio: 3px;
+}
+
+:root[data-theme='escuro'] {
+  color-scheme: dark;
+  --cor-fundo: #14181B;
+  --cor-painel: #1D2226;
+  --cor-borda: #333A3F;
+  --cor-texto: #E7E4DC;
+  --cor-texto-suave: #9BA3A8;
+  --cor-primaria: #203841;
+  --cor-primaria-hover: #15262C;
+  --cor-acento: #E0824F;
+  --cor-erro: #D97359;
+  --cor-primaria-tenue: rgba(91, 140, 155, 0.18);
+  --cor-erro-tenue: rgba(217, 115, 89, 0.18);
+  --cor-destaque: #7FB4C2;
+  --cor-destaque-hover: #9CC6D1;
 }
 
 * {
@@ -23,6 +45,13 @@ body {
   color: var(--cor-texto);
   font-family: var(--fonte-texto);
   -webkit-font-smoothing: antialiased;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 h1,

@@ -14,8 +14,39 @@
   gap: 4px;
 }
 
+.sidebar-cabecalho {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
 .sidebar-titulo {
   font-size: 22px;
+  color: #FBFAF7;
+}
+
+.botao-tema {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  background: transparent;
+  border: none;
+  border-radius: 50%;
+  color: #C9D6D1;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.botao-tema svg {
+  width: 16px;
+  height: 16px;
+}
+
+.botao-tema:hover {
+  background: rgba(255, 255, 255, 0.1);
   color: #FBFAF7;
 }
 

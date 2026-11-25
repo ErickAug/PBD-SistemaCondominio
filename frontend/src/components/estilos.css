@@ -35,9 +35,9 @@ h2 {
 }
 
 .campo input:focus {
-  outline: 2px solid var(--cor-primaria);
+  outline: 2px solid var(--cor-destaque);
   outline-offset: 1px;
-  border-color: var(--cor-primaria);
+  border-color: var(--cor-destaque);
 }
 
 .campo textarea {
@@ -52,9 +52,9 @@ h2 {
 }
 
 .campo textarea:focus {
-  outline: 2px solid var(--cor-primaria);
+  outline: 2px solid var(--cor-destaque);
   outline-offset: 1px;
-  border-color: var(--cor-primaria);
+  border-color: var(--cor-destaque);
 }
 
 .formulario-correcao {
@@ -121,7 +121,7 @@ h2 {
 }
 
 .confirmacao {
-  color: var(--cor-primaria);
+  color: var(--cor-destaque);
   font-size: 13px;
 }
 
@@ -324,7 +324,7 @@ h2 {
 }
 
 .botao-secundario:hover {
-  border-color: var(--cor-primaria);
+  border-color: var(--cor-destaque);
 }
 
 .nav-sair {
@@ -362,8 +362,8 @@ h2 {
 }
 
 .selo-ativo {
-  color: var(--cor-primaria);
-  border-color: var(--cor-primaria);
+  color: var(--cor-destaque);
+  border-color: var(--cor-destaque);
 }
 
 .selo-inativo {
@@ -380,13 +380,13 @@ h2 {
 }
 
 .painel-fracao.ok {
-  background: rgba(44, 74, 82, 0.08);
-  border-color: var(--cor-primaria);
-  color: var(--cor-primaria);
+  background: var(--cor-primaria-tenue);
+  border-color: var(--cor-destaque);
+  color: var(--cor-destaque);
 }
 
 .painel-fracao.alerta {
-  background: rgba(166, 67, 46, 0.08);
+  background: var(--cor-erro-tenue);
   border-color: var(--cor-erro);
   color: var(--cor-erro);
 }
@@ -414,8 +414,8 @@ h2 {
 
 .botao-detalhes {
   background: transparent;
-  border: 1px solid var(--cor-primaria);
-  color: var(--cor-primaria);
+  border: 1px solid var(--cor-destaque);
+  color: var(--cor-destaque);
   padding: 6px 12px;
   border-radius: var(--raio);
   font-size: 13px;
@@ -511,7 +511,7 @@ h2 {
 }
 
 .item-tempo.atual strong {
-  color: var(--cor-primaria);
+  color: var(--cor-destaque);
 }
 
 .periodo {
@@ -528,7 +528,7 @@ h2 {
   padding: 10px 14px;
   border: 1px solid var(--cor-erro);
   border-radius: var(--raio);
-  background: rgba(166, 67, 46, 0.08);
+  background: var(--cor-erro-tenue);
   color: var(--cor-erro);
   font-size: 14px;
   line-height: 1.4;
@@ -570,8 +570,8 @@ h2 {
 }
 
 .aba.ativa {
-  color: var(--cor-primaria);
-  border-bottom-color: var(--cor-primaria);
+  color: var(--cor-destaque);
+  border-bottom-color: var(--cor-destaque);
   font-weight: 500;
 }
 
@@ -599,7 +599,7 @@ h2 {
   cursor: pointer;
   padding: 12px 0;
   font-size: 14px;
-  color: var(--cor-primaria);
+  color: var(--cor-destaque);
   font-weight: 500;
   list-style: none;
 }
@@ -620,7 +620,7 @@ h2 {
 }
 
 .historico-disclosure summary:hover {
-  color: var(--cor-primaria-hover);
+  color: var(--cor-destaque-hover);
 }
 
 .historico-disclosure[open] summary {
@@ -825,7 +825,7 @@ h2 {
 }
 
 .coluna-ordenavel:hover {
-  color: var(--cor-primaria);
+  color: var(--cor-destaque);
 }
 
 .tabela-dados tbody tr:last-child td {
@@ -871,7 +871,7 @@ h2 {
 }
 
 .total-despesas strong {
-  color: var(--cor-primaria);
+  color: var(--cor-destaque);
 }
 
 .campo select {
