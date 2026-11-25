@@ -167,6 +167,14 @@ export function IconeSol(props) {
   )
 }
 
+export function IconeChevronLateral(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M11 4.5L6.5 9l4.5 4.5" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>

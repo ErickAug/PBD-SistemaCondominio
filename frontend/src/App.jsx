@@ -44,6 +44,7 @@ import {
   IconeUnidade,
   IconeSol,
   IconeLua,
+  IconeChevronLateral,
   IconeSair,
 } from './components/IconesMenu.jsx'
 import { buscarCondominios, listarMinhasUnidades, logout as apiLogout } from './services/api.js'
@@ -66,6 +67,13 @@ function App() {
       return 'claro'
     }
   })
+  const [sidebarColapsada, setSidebarColapsada] = useState(() => {
+    try {
+      return localStorage.getItem('sidebarColapsada') === 'sim'
+    } catch {
+      return false
+    }
+  })
 
   const ehAdministradora = usuarioLogado?.perfil === 'administradora'
   const ehSindico = usuarioLogado?.perfil === 'sindico'
@@ -84,6 +92,18 @@ function App() {
 
   function alternarTema() {
     setTema((temaAtual) => (temaAtual === 'escuro' ? 'claro' : 'escuro'))
+  }
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('sidebarColapsada', sidebarColapsada ? 'sim' : 'nao')
+    } catch {
+      // armazenamento local indisponível; a preferência só não persiste entre sessões
+    }
+  }, [sidebarColapsada])
+
+  function alternarSidebar() {
+    setSidebarColapsada((colapsada) => !colapsada)
   }
 
   useEffect(() => {
@@ -147,7 +167,7 @@ function App() {
 
   return (
     <div className="layout">
-      <aside className="sidebar">
+      <aside className={sidebarColapsada ? 'sidebar colapsada' : 'sidebar'}>
         <div className="sidebar-cabecalho">
           <h1 className="sidebar-titulo">Condomínios</h1>
           <button
@@ -157,6 +177,14 @@ function App() {
             title={tema === 'escuro' ? 'Modo claro' : 'Modo escuro'}
           >
             {tema === 'escuro' ? <IconeSol /> : <IconeLua />}
+          </button>
+          <button
+            className="botao-tema botao-colapsar"
+            onClick={alternarSidebar}
+            aria-label={sidebarColapsada ? 'Expandir menu' : 'Ocultar menu'}
+            title={sidebarColapsada ? 'Expandir menu' : 'Ocultar menu'}
+          >
+            <IconeChevronLateral />
           </button>
         </div>
         <p className="sidebar-subtitulo">{usuarioLogado.nome}</p>
@@ -178,7 +206,7 @@ function App() {
         )}
 
         {ehAdministradora && (
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" key={sidebarColapsada ? 'colapsada' : 'expandida'}>
             <button
               className={telaAtual === 'administradora' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('administradora')}
@@ -204,7 +232,7 @@ function App() {
         )}
 
         {ehSindico && (
-  <nav className="sidebar-nav">
+  <nav className="sidebar-nav" key={sidebarColapsada ? 'colapsada' : 'expandida'}>
     <button
       className={telaAtual === 'unidades' ? 'nav-item ativo' : 'nav-item'}
       onClick={() => setTelaAtual('unidades')}
@@ -293,7 +321,7 @@ function App() {
 )}
 
         {ehPortaria && (
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" key={sidebarColapsada ? 'colapsada' : 'expandida'}>
             <button
               className={telaAtual === 'portariaOcorrencias' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('portariaOcorrencias')}
@@ -326,7 +354,7 @@ function App() {
         )}
 
         {ehMoradorOuProprietario && (
-          <nav className="sidebar-nav">
+          <nav className="sidebar-nav" key={sidebarColapsada ? 'colapsada' : 'expandida'}>
             <button
               className={telaAtual === 'minhaArea' ? 'nav-item ativo' : 'nav-item'}
               onClick={() => setTelaAtual('minhaArea')}
