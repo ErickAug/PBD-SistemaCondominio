@@ -150,6 +150,23 @@ export function IconeUnidade(props) {
   )
 }
 
+export function IconeLua(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M13.8 10.3A5.6 5.6 0 0 1 7.6 3.2a5.8 5.8 0 1 0 6.2 7.1z" pathLength="1" />
+    </svg>
+  )
+}
+
+export function IconeSol(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <circle cx="9" cy="9" r="3" pathLength="1" />
+      <path d="M9 2.3v2M9 13.7v2M15.7 9h-2M4.3 9h-2M13.8 4.2l-1.4 1.4M5.6 12.4l-1.4 1.4M13.8 13.8l-1.4-1.4M5.6 5.6L4.2 4.2" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>

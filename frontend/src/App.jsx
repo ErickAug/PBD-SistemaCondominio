@@ -42,6 +42,8 @@ import {
   IconeReuniao,
   IconePainel,
   IconeUnidade,
+  IconeSol,
+  IconeLua,
   IconeSair,
 } from './components/IconesMenu.jsx'
 import { buscarCondominios, listarMinhasUnidades, logout as apiLogout } from './services/api.js'
@@ -57,12 +59,32 @@ function App() {
   const [minhasUnidades, setMinhasUnidades] = useState([])
   const [unidadeAtivaId, setUnidadeAtivaId] = useState('')
   const [carregandoUnidades, setCarregandoUnidades] = useState(true)
+  const [tema, setTema] = useState(() => {
+    try {
+      return localStorage.getItem('tema') || 'claro'
+    } catch {
+      return 'claro'
+    }
+  })
 
   const ehAdministradora = usuarioLogado?.perfil === 'administradora'
   const ehSindico = usuarioLogado?.perfil === 'sindico'
   const ehPortaria = usuarioLogado?.perfil === 'portaria'
   const ehMoradorOuProprietario =
     usuarioLogado?.perfil === 'morador' || usuarioLogado?.perfil === 'proprietario'
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', tema)
+    try {
+      localStorage.setItem('tema', tema)
+    } catch {
+      // armazenamento local indisponível; o tema só não persiste entre sessões
+    }
+  }, [tema])
+
+  function alternarTema() {
+    setTema((temaAtual) => (temaAtual === 'escuro' ? 'claro' : 'escuro'))
+  }
 
   useEffect(() => {
     if (!usuarioLogado || !ehAdministradora) return
@@ -126,7 +148,17 @@ function App() {
   return (
     <div className="layout">
       <aside className="sidebar">
-        <h1 className="sidebar-titulo">Condomínios</h1>
+        <div className="sidebar-cabecalho">
+          <h1 className="sidebar-titulo">Condomínios</h1>
+          <button
+            className="botao-tema"
+            onClick={alternarTema}
+            aria-label={tema === 'escuro' ? 'Ativar modo claro' : 'Ativar modo escuro'}
+            title={tema === 'escuro' ? 'Modo claro' : 'Modo escuro'}
+          >
+            {tema === 'escuro' ? <IconeSol /> : <IconeLua />}
+          </button>
+        </div>
         <p className="sidebar-subtitulo">{usuarioLogado.nome}</p>
 
         {ehAdministradora && condominios.length > 0 && (
