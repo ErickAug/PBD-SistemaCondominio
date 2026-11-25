@@ -3,6 +3,7 @@ package br.com.condominio.backend.service;
 import br.com.condominio.backend.exception.RegraDeNegocioException;
 import br.com.condominio.backend.model.Administradora;
 import br.com.condominio.backend.repository.AdministradoraRepository;
+import br.com.condominio.backend.util.CnpjUtil;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -15,6 +16,8 @@ public class AdministradoraService {
     }
 
     public Administradora cadastrar(Administradora administradora) {
+        administradora.setCnpj(CnpjUtil.normalizar(administradora.getCnpj()));
+
         if (administradoraRepository.existsByCnpj(administradora.getCnpj())) {
             throw new RegraDeNegocioException("Já existe uma administradora cadastrada com este CNPJ.");
         }
