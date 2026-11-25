@@ -129,6 +129,27 @@ export function IconeReuniao(props) {
   )
 }
 
+export function IconePainel(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <rect x="2.5" y="2.5" width="6" height="6" rx="0.8" pathLength="1" />
+      <rect x="9.5" y="2.5" width="6" height="6" rx="0.8" pathLength="1" />
+      <rect x="2.5" y="9.5" width="6" height="6" rx="0.8" pathLength="1" />
+      <rect x="9.5" y="9.5" width="6" height="6" rx="0.8" pathLength="1" />
+    </svg>
+  )
+}
+
+export function IconeUnidade(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <path d="M3 8.3L9 3l6 5.3" pathLength="1" />
+      <path d="M4.5 7.5V15h9V7.5" pathLength="1" />
+      <path d="M7.5 15v-4a1.5 1.5 0 0 1 3 0v4" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>

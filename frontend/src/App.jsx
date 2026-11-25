@@ -40,6 +40,8 @@ import {
   IconeChamado,
   IconeReserva,
   IconeReuniao,
+  IconePainel,
+  IconeUnidade,
   IconeSair,
 } from './components/IconesMenu.jsx'
 import { buscarCondominios, listarMinhasUnidades, logout as apiLogout } from './services/api.js'
@@ -96,6 +98,8 @@ function App() {
       setTelaAtual('unidades')
     } else if (usuario.perfil === 'portaria') {
       setTelaAtual('portariaOcorrencias')
+    } else if (usuario.perfil === 'morador' || usuario.perfil === 'proprietario') {
+      setTelaAtual('minhaArea')
     } else {
       setTelaAtual('administradora')
     }
@@ -289,6 +293,60 @@ function App() {
           </nav>
         )}
 
+        {ehMoradorOuProprietario && (
+          <nav className="sidebar-nav">
+            <button
+              className={telaAtual === 'minhaArea' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('minhaArea')}
+            >
+              <IconePainel className="nav-icone" />
+              <span>Minha área</span>
+            </button>
+            <button
+              className={telaAtual === 'meusAvisos' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('meusAvisos')}
+            >
+              <IconeAviso className="nav-icone" />
+              <span>Avisos</span>
+            </button>
+            <button
+              className={telaAtual === 'minhasOcorrencias' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('minhasOcorrencias')}
+            >
+              <IconeChamado className="nav-icone" />
+              <span>Minhas ocorrências</span>
+            </button>
+            <button
+              className={telaAtual === 'minhasReservas' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('minhasReservas')}
+            >
+              <IconeReserva className="nav-icone" />
+              <span>Reservar área comum</span>
+            </button>
+            <button
+              className={telaAtual === 'minhasReunioes' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('minhasReunioes')}
+            >
+              <IconeReuniao className="nav-icone" />
+              <span>Reuniões</span>
+            </button>
+            <button
+              className={telaAtual === 'minhaUnidade' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('minhaUnidade')}
+            >
+              <IconeUnidade className="nav-icone" />
+              <span>Minha unidade</span>
+            </button>
+            <button
+              className={telaAtual === 'prestacaoContasUnidade' ? 'nav-item ativo' : 'nav-item'}
+              onClick={() => setTelaAtual('prestacaoContasUnidade')}
+            >
+              <IconeRelatorio className="nav-icone" />
+              <span>Prestação de contas</span>
+            </button>
+          </nav>
+        )}
+
         <button className="nav-item nav-sair" onClick={sair}>
           <IconeSair className="nav-icone" />
           <span>Sair</span>
@@ -378,34 +436,48 @@ function App() {
           </>
         ) : ehMoradorOuProprietario ? (
           <>
-            <MinhaArea
-              condominioId={usuarioLogado.condominioId}
-              unidadeAtiva={unidadeAtiva}
-              carregandoUnidades={carregandoUnidades}
-            />
-            <MeusAvisos condominioId={usuarioLogado.condominioId} />
-            <MinhasOcorrencias
-              condominioId={usuarioLogado.condominioId}
-              blocoId={unidadeAtiva?.blocoId}
-              unidadeId={unidadeAtiva?.unidadeId}
-            />
-            <MinhasReservas
-              condominioId={usuarioLogado.condominioId}
-              blocoId={unidadeAtiva?.blocoId}
-              unidadeId={unidadeAtiva?.unidadeId}
-              podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
-            />
-            <MinhasReunioes condominioId={usuarioLogado.condominioId} />
-            <MinhaUnidade
-              condominioId={usuarioLogado.condominioId}
-              blocoId={unidadeAtiva?.blocoId}
-              unidadeId={unidadeAtiva?.unidadeId}
-              blocoNome={unidadeAtiva?.blocoNome}
-              unidadeNumero={unidadeAtiva?.unidadeNumero}
-              usuarioId={usuarioLogado.usuarioId}
-              podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
-            />
-            <PrestacaoContasUnidade condominioId={usuarioLogado.condominioId} />
+            {telaAtual === 'minhaArea' && (
+              <MinhaArea
+                condominioId={usuarioLogado.condominioId}
+                unidadeAtiva={unidadeAtiva}
+                carregandoUnidades={carregandoUnidades}
+              />
+            )}
+            {telaAtual === 'meusAvisos' && (
+              <MeusAvisos condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'minhasOcorrencias' && (
+              <MinhasOcorrencias
+                condominioId={usuarioLogado.condominioId}
+                blocoId={unidadeAtiva?.blocoId}
+                unidadeId={unidadeAtiva?.unidadeId}
+              />
+            )}
+            {telaAtual === 'minhasReservas' && (
+              <MinhasReservas
+                condominioId={usuarioLogado.condominioId}
+                blocoId={unidadeAtiva?.blocoId}
+                unidadeId={unidadeAtiva?.unidadeId}
+                podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
+              />
+            )}
+            {telaAtual === 'minhasReunioes' && (
+              <MinhasReunioes condominioId={usuarioLogado.condominioId} />
+            )}
+            {telaAtual === 'minhaUnidade' && (
+              <MinhaUnidade
+                condominioId={usuarioLogado.condominioId}
+                blocoId={unidadeAtiva?.blocoId}
+                unidadeId={unidadeAtiva?.unidadeId}
+                blocoNome={unidadeAtiva?.blocoNome}
+                unidadeNumero={unidadeAtiva?.unidadeNumero}
+                usuarioId={usuarioLogado.usuarioId}
+                podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
+              />
+            )}
+            {telaAtual === 'prestacaoContasUnidade' && (
+              <PrestacaoContasUnidade condominioId={usuarioLogado.condominioId} />
+            )}
           </>
         ) : (
           <AreaPerfil usuarioLogado={usuarioLogado} />

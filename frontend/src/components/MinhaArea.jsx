@@ -242,14 +242,6 @@ function MinhaArea({ condominioId, unidadeAtiva, carregandoUnidades }) {
             mensagemVazia="Nenhuma ocorrência para esta unidade."
           />
 
-          <h3 className="subtitulo-secao">O que você pode fazer nesta unidade</h3>
-          <ul>
-            <li>Autorizar visita: {painel.permissoes.autorizarVisita ? 'sim' : 'não'}</li>
-            <li>Reservar área comum: {painel.permissoes.reservarAreaComum ? 'sim' : 'não'}</li>
-            <li>Abrir ocorrência: {painel.permissoes.abrirOcorrencia ? 'sim' : 'não'}</li>
-            <li>Ver prestação de contas: {painel.permissoes.verPrestacaoContas ? 'sim' : 'não'}</li>
-          </ul>
-
           <h3 className="subtitulo-secao">
             Prestação de contas {painel.prestacaoContas && `— ${formatarCompetencia(painel.prestacaoContas.periodo.competencia)}`}
           </h3>
