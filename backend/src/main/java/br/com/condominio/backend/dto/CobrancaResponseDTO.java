@@ -7,7 +7,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 public record CobrancaResponseDTO(
-        Long id, Long unidadeId, String unidadeNumero, LocalDate competencia, LocalDate vencimento,
+        Long id, Long unidadeId, String unidadeNumero, Integer unidadeAndar, String blocoNome,
+        LocalDate competencia, LocalDate vencimento,
         SituacaoCobranca situacao, boolean emAtraso, Long diasAtraso,
         BigDecimal valorOrdinario, BigDecimal valorExtraordinario, BigDecimal valorTotal,
         String responsavelOrdinarioNome, String responsavelExtraordinarioNome,

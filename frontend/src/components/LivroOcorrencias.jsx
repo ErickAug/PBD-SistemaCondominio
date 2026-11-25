@@ -412,7 +412,7 @@ function LivroOcorrencias({ condominioId, somenteLeitura = false }) {
                 <option value="">Nenhuma</option>
                 {unidades.map((u) => (
                   <option key={u.id} value={u.id}>
-                    {u.numero}
+                    {u.numero} (andar {u.andar})
                   </option>
                 ))}
               </select>
@@ -494,7 +494,7 @@ function LivroOcorrencias({ condominioId, somenteLeitura = false }) {
             <option value="">Todas</option>
             {unidadesFiltro.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.numero}
+                {u.numero} (andar {u.andar})
               </option>
             ))}
           </select>

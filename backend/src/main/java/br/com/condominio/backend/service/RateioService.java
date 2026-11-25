@@ -58,7 +58,7 @@ public class RateioService {
             UnidadeService.StatusFracaoIdeal status = unidadeService.calcularStatusFracao(condominio.getId());
             if (!status.fechaEm100()) {
                 throw new RegraDeNegocioException(
-                        "A soma das frações ideais das unidades não fecha em 100%% (diferença: "
+                        "A soma das frações ideais das unidades não fecha em 100% (diferença: "
                                 + status.diferencaParaFechar() + "). Ajuste antes de ratear.");
             }
         }
@@ -71,7 +71,8 @@ public class RateioService {
 
         List<String> unidadesComProblema = itens.stream()
                 .filter(item -> item.getResponsavelOrdinario() == null || item.getResponsavelExtraordinario() == null)
-                .map(item -> item.getUnidade().getNumero())
+                .map(item -> item.getUnidade().getBloco().getNome() + " " + item.getUnidade().getNumero()
+                        + " (andar " + item.getUnidade().getAndar() + ")")
                 .toList();
 
         if (!unidadesComProblema.isEmpty()) {

@@ -11,7 +11,8 @@ function rotuloAlcance(valor) {
 
 function formatarData(data) {
   if (!data) return ''
-  return new Date(data).toLocaleDateString('pt-BR')
+  const [ano, mes, dia] = data.split('-')
+  return `${dia}/${mes}/${ano}`
 }
 
 function formatarDataHora(dataHora) {

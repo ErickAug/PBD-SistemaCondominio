@@ -46,7 +46,7 @@ function DarBaixaModal({ cobranca, condominioId, aoSalvar, aoFechar }) {
   }
 
   return (
-    <Modal titulo={`Dar baixa — unidade ${cobranca.unidadeNumero}`} aoFechar={aoFechar}>
+    <Modal titulo={`Dar baixa — ${cobranca.blocoNome} ${cobranca.unidadeNumero} (andar ${cobranca.unidadeAndar})`} aoFechar={aoFechar}>
       <form onSubmit={salvar} className="formulario">
         <p className="descricao-curta">
           Valor devido: <strong>{formatarMoeda(cobranca.valorTotal)}</strong>

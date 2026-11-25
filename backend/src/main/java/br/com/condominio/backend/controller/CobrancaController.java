@@ -97,6 +97,7 @@ public class CobrancaController {
 
         return new CobrancaResponseDTO(
                 cobranca.getId(), unidade.getId(), unidade.getNumero(),
+                unidade.getAndar(), unidade.getBloco().getNome(),
                 rateioUnidade.getRateioMensal().getCompetencia(), cobranca.getVencimento(),
                 cobranca.getSituacao(), emAtraso, diasAtraso,
                 rateioUnidade.getValorOrdinario(), rateioUnidade.getValorExtraordinario(), rateioUnidade.getValorTotal(),

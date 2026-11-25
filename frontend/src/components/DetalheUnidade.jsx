@@ -200,7 +200,7 @@ function DetalheUnidade({ condominioId, unidade, nomeBloco, aoAtualizar, aoFecha
     }
   }
 
-  const titulo = `${nomeBloco} \u00b7 unidade ${unidade.numero}`
+  const titulo = `${nomeBloco} \u00b7 unidade ${unidade.numero} (andar ${unidade.andar})`
 
   if (carregando) {
     return (

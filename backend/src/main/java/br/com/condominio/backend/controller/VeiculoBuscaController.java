@@ -39,7 +39,7 @@ public class VeiculoBuscaController {
     private VeiculoBuscaResponseDTO toBuscaDTO(Veiculo v) {
         return new VeiculoBuscaResponseDTO(
                 v.getId(), v.getPlaca(), v.getModelo(), v.getCor(),
-                v.getUnidade().getBloco().getNome(), v.getUnidade().getNumero(), v.getUnidade().getId(),
+                v.getUnidade().getBloco().getNome(), v.getUnidade().getNumero(), v.getUnidade().getAndar(), v.getUnidade().getId(),
                 v.getDono().getNome(), v.getDono().getContato(),
                 v.getVaga() != null ? v.getVaga().getNumero() : null
         );

@@ -75,12 +75,12 @@ public class UnidadeController {
         return ResponseEntity.ok(toResponseDTO(atualizada, null));
     }
 
-    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO')")
+    @PreAuthorize("hasAnyRole('ADMINISTRADORA', 'SINDICO', 'PORTARIA')")
     @GetMapping
     public ResponseEntity<List<UnidadeResponseDTO>> listar(@PathVariable Long condominioId,
                                                            @PathVariable Long blocoId,
                                                            @AuthenticationPrincipal UsuarioDetailsImpl usuarioAutenticado) {
-        tenantAccessGuard.validarAcessoGerencialAoCondominio(condominioId, usuarioAutenticado);
+        tenantAccessGuard.validarAcessoLeituraAoCondominio(condominioId, usuarioAutenticado);
         blocoService.buscarValidandoCondominio(blocoId, condominioId);
 
         List<Unidade> unidades = unidadeService.listarPorBloco(blocoId);

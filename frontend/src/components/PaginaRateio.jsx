@@ -13,7 +13,11 @@ function formatarData(data) {
 }
 
 const COLUNAS = [
-  { chave: 'unidadeNumero', titulo: 'Unidade' },
+  {
+    chave: 'unidadeNumero',
+    titulo: 'Unidade',
+    renderizar: (item) => `${item.blocoNome} ${item.unidadeNumero} (andar ${item.unidadeAndar})`,
+  },
   {
     chave: 'valorOrdinario',
     titulo: 'Ordinário',

@@ -54,6 +54,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId, podeUsar = true }) {
 
   const [cancelandoId, setCancelandoId] = useState(null)
   const [erroCancelar, setErroCancelar] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     listarAreasComuns(condominioId).then(setAreas).catch(() => setAreas([]))
@@ -101,6 +102,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId, podeUsar = true }) {
       })
       setForm(formVazio)
       carregar()
+      setRefreshKey((anterior) => anterior + 1)
     } catch (e) {
       setErroForm(e.message)
     } finally {
@@ -114,6 +116,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId, podeUsar = true }) {
     try {
       await cancelarReserva(condominioId, blocoId, unidadeId, reserva.id)
       carregar()
+      setRefreshKey((anterior) => anterior + 1)
     } catch (e) {
       setErroCancelar({ id: reserva.id, mensagem: e.message })
     } finally {
@@ -223,7 +226,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId, podeUsar = true }) {
       )}
 
       <h3 className="subtitulo-secao">Calendário de reservas</h3>
-      <CalendarioReservas condominioId={condominioId} />
+      <CalendarioReservas condominioId={condominioId} refreshKey={refreshKey} />
     </section>
   )
 }

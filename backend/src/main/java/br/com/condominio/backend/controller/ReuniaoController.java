@@ -148,6 +148,7 @@ public class ReuniaoController {
                 p.getUnidade().getId(),
                 p.getUnidade().getBloco().getNome(),
                 p.getUnidade().getNumero(),
+                p.getUnidade().getAndar(),
                 p.getCompareceu(),
                 p.getRegistradoPor().getNome(),
                 p.getDataRegistro());

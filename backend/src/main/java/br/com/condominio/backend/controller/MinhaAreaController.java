@@ -93,7 +93,8 @@ public class MinhaAreaController {
     }
 
     private MinhaUnidadeDTO toUnidadeDTO(Unidade u, List<String> papeis) {
-        return new MinhaUnidadeDTO(u.getId(), u.getBloco().getId(), u.getBloco().getNome(), u.getNumero(), papeis);
+        return new MinhaUnidadeDTO(u.getId(), u.getBloco().getId(), u.getBloco().getNome(), u.getNumero(),
+                u.getAndar(), papeis);
     }
 
     private AvisoPainelDTO toAvisoDTO(MinhaAreaService.AvisoDoPainel item) {

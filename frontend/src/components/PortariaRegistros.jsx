@@ -365,7 +365,7 @@ function PortariaRegistros({ condominioId }) {
             <option value="">Selecione</option>
             {unidades.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.numero}
+                {u.numero} (andar {u.andar})
               </option>
             ))}
           </select>
@@ -453,7 +453,7 @@ function PortariaRegistros({ condominioId }) {
             <option value="">Selecione</option>
             {unidadesBusca.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.numero}
+                {u.numero} (andar {u.andar})
               </option>
             ))}
           </select>
@@ -507,7 +507,7 @@ function PortariaRegistros({ condominioId }) {
             <option value="">Todas</option>
             {unidadesHistorico.map((u) => (
               <option key={u.id} value={u.id}>
-                {u.numero}
+                {u.numero} (andar {u.andar})
               </option>
             ))}
           </select>

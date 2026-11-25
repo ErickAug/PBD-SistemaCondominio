@@ -38,6 +38,7 @@ function AreasComuns({ condominioId }) {
   const [motivoRecusa, setMotivoRecusa] = useState('')
   const [salvandoAcaoId, setSalvandoAcaoId] = useState(null)
   const [erroAcao, setErroAcao] = useState(null)
+  const [refreshKey, setRefreshKey] = useState(0)
 
   const carregarAreas = useCallback(() => {
     setCarregandoAreas(true)
@@ -100,6 +101,7 @@ function AreasComuns({ condominioId }) {
     try {
       await aprovarReserva(condominioId, reserva.id)
       carregarPendentes()
+      setRefreshKey((anterior) => anterior + 1)
     } catch (e) {
       setErroAcao({ id: reserva.id, mensagem: e.message })
     } finally {
@@ -130,6 +132,7 @@ function AreasComuns({ condominioId }) {
       setRecusandoId(null)
       setMotivoRecusa('')
       carregarPendentes()
+      setRefreshKey((anterior) => anterior + 1)
     } catch (e) {
       setErroAcao({ id: reserva.id, mensagem: e.message })
     } finally {
@@ -249,7 +252,7 @@ function AreasComuns({ condominioId }) {
       />
 
       <h3 className="subtitulo-secao">Calendário de reservas</h3>
-      <CalendarioReservas condominioId={condominioId} />
+      <CalendarioReservas condominioId={condominioId} refreshKey={refreshKey} />
     </section>
   )
 }

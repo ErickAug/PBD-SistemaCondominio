@@ -71,7 +71,7 @@ function PaginaCobrancas({ condominioId }) {
 
   async function excluir(cobranca) {
     const confirmar = window.confirm(
-      `Excluir a cobrança da unidade ${cobranca.unidadeNumero} (${formatarMoeda(cobranca.valorTotal)})?`
+      `Excluir a cobrança da unidade ${cobranca.blocoNome} ${cobranca.unidadeNumero} (andar ${cobranca.unidadeAndar}) (${formatarMoeda(cobranca.valorTotal)})?`
     )
     if (!confirmar) return
 
@@ -89,7 +89,11 @@ function PaginaCobrancas({ condominioId }) {
 
   const colunas = useMemo(
     () => [
-      { chave: 'unidadeNumero', titulo: 'Unidade' },
+      {
+        chave: 'unidadeNumero',
+        titulo: 'Unidade',
+        renderizar: (item) => `${item.blocoNome} ${item.unidadeNumero} (andar ${item.unidadeAndar})`,
+      },
       { chave: 'competencia', titulo: 'Competência', renderizar: (item) => formatarData(item.competencia) },
       { chave: 'vencimento', titulo: 'Vencimento', renderizar: (item) => formatarData(item.vencimento) },
       {
