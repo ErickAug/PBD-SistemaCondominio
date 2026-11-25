@@ -1080,3 +1080,11 @@ h2 {
   border: 1px solid var(--cor-borda);
   margin: 10px 0;
 }
+
+.calendario-area {
+  margin: 12px 0 24px;
+}
+
+.calendario-area h4 {
+  margin: 0 0 6px;
+}

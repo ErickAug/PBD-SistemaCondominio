@@ -1091,3 +1091,124 @@ export async function responderOcorrenciaMorador(condominioId, ocorrenciaId, dad
 
   return resposta.json()
 }
+
+export async function cadastrarAreaComum(condominioId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/areas-comuns`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cadastrar a área comum.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarAreasComuns(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/areas-comuns`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as áreas comuns.')
+  }
+
+  return resposta.json()
+}
+
+export async function criarReserva(condominioId, blocoId, unidadeId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/reservas`,
+    { method: 'POST', headers: headersAutenticados(), body: JSON.stringify(dados) }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível criar a reserva.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarReservasDaUnidade(condominioId, blocoId, unidadeId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/reservas`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as reservas.')
+  }
+
+  return resposta.json()
+}
+
+export async function cancelarReserva(condominioId, blocoId, unidadeId, reservaId) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/blocos/${blocoId}/unidades/${unidadeId}/reservas/${reservaId}/cancelar`,
+    { method: 'PATCH', headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível cancelar a reserva.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarReservasPendentes(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reservas/pendentes`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as reservas pendentes.')
+  }
+
+  return resposta.json()
+}
+
+export async function aprovarReserva(condominioId, reservaId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reservas/${reservaId}/aprovar`, {
+    method: 'PATCH',
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível aprovar a reserva.')
+  }
+
+  return resposta.json()
+}
+
+export async function recusarReserva(condominioId, reservaId, motivo) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reservas/${reservaId}/recusar`, {
+    method: 'PATCH',
+    headers: headersAutenticados(),
+    body: JSON.stringify({ motivo }),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível recusar a reserva.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarCalendarioReservas(condominioId, mes, areaComumId) {
+  const parametros = new URLSearchParams()
+  if (mes) parametros.set('mes', mes)
+  if (areaComumId) parametros.set('areaComumId', areaComumId)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reservas/calendario${query}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o calendário de reservas.')
+  }
+
+  return resposta.json()
+}

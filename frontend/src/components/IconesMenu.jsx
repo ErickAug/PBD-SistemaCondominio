@@ -108,6 +108,17 @@ export function IconeChamado(props) {
   )
 }
 
+export function IconeReserva(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <rect x="2.5" y="3.5" width="13" height="12" rx="1" pathLength="1" />
+      <path d="M2.5 7h13" pathLength="1" />
+      <path d="M5.5 2v3M12.5 2v3" pathLength="1" />
+      <path d="M6 10.2l1.7 1.7L12 7.8" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>
