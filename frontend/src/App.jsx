@@ -86,7 +86,6 @@ function App() {
     try {
       localStorage.setItem('tema', tema)
     } catch {
-      // armazenamento local indisponível; o tema só não persiste entre sessões
     }
   }, [tema])
 
@@ -98,7 +97,6 @@ function App() {
     try {
       localStorage.setItem('sidebarColapsada', sidebarColapsada ? 'sim' : 'nao')
     } catch {
-      // armazenamento local indisponível; a preferência só não persiste entre sessões
     }
   }, [sidebarColapsada])
 
@@ -445,7 +443,7 @@ function App() {
               <CadastroUsuarios
                 condominios={condominiosDoSindico}
                 condominioAtivoId={usuarioLogado.condominioId}
-                perfisPermitidos={['MORADOR', 'PROPRIETARIO']}
+                perfisPermitidos={['MORADOR', 'PROPRIETARIO', 'PORTARIA']}
               />
             )}
             {telaAtual === 'despesas' && (

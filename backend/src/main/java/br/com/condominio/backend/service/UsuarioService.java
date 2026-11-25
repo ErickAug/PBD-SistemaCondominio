@@ -18,7 +18,7 @@ import java.util.Set;
 @Service
 public class UsuarioService {
 
-    private static final Set<Perfil> PERFIS_QUE_SINDICO_PODE_CRIAR = Set.of(Perfil.MORADOR, Perfil.PROPRIETARIO);
+    private static final Set<Perfil> PERFIS_QUE_SINDICO_PODE_CRIAR = Set.of(Perfil.MORADOR, Perfil.PROPRIETARIO, Perfil.PORTARIA);
 
     private final UsuarioRepository usuarioRepository;
     private final AdministradoraRepository administradoraRepository;
@@ -57,7 +57,7 @@ public class UsuarioService {
         }
 
         if (perfilDeQuemCadastra == Perfil.SINDICO && !PERFIS_QUE_SINDICO_PODE_CRIAR.contains(usuario.getPerfil())) {
-            throw new RegraDeNegocioException("Síndico só pode cadastrar moradores e proprietários.");
+            throw new RegraDeNegocioException("Síndico só pode cadastrar moradores, proprietários e portaria.");
         }
 
         validarLoginDisponivel(usuario.getUsuario());
