@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatarCnpj } from '../utils/cnpj.js'
 
 function CadastroAdministradora() {
   const [form, setForm] = useState({
@@ -11,9 +12,10 @@ function CadastroAdministradora() {
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target
+    const valorTratado = name === 'cnpj' ? formatarCnpj(value) : value
     setForm((formAnterior) => ({
       ...formAnterior,
-      [name]: value,
+      [name]: valorTratado,
     }))
   }
 
@@ -60,6 +62,8 @@ function CadastroAdministradora() {
             value={form.cnpj}
             onChange={atualizarCampo}
             placeholder="00.000.000/0000-00"
+            inputMode="numeric"
+            maxLength={18}
             required
           />
         </label>

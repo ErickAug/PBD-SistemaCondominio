@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { criarCondominio } from '../services/api.js'
 import TabelaDados from './TabelaDados.jsx'
+import { formatarCnpj, somenteDigitos, cnpjTemTamanhoValido } from '../utils/cnpj.js'
 
 const COLUNAS_CONDOMINIOS = [
   { chave: 'nome', titulo: 'Nome' },
   { chave: 'endereco', titulo: 'Endereço' },
-  { chave: 'cnpj', titulo: 'CNPJ' },
+  { chave: 'cnpj', titulo: 'CNPJ', renderizar: (item) => formatarCnpj(item.cnpj) },
   {
     chave: 'situacao',
     titulo: 'Situação',
@@ -31,12 +32,19 @@ function CadastroCondominios({ administradoraId, condominios, setCondominios, er
 
   function atualizarCampo(evento) {
     const { name, value } = evento.target
-    setForm((anterior) => ({ ...anterior, [name]: value }))
+    const valorTratado = name === 'cnpj' ? formatarCnpj(value) : value
+    setForm((anterior) => ({ ...anterior, [name]: valorTratado }))
     setErro('')
   }
 
   async function adicionarCondominio(evento) {
     evento.preventDefault()
+
+    if (!cnpjTemTamanhoValido(form.cnpj)) {
+      setErro('CNPJ inválido. Informe os 14 dígitos do CNPJ.')
+      return
+    }
+
     setEnviando(true)
     setErro('')
 
@@ -45,7 +53,7 @@ function CadastroCondominios({ administradoraId, condominios, setCondominios, er
       const novoCondominio = await criarCondominio(administradoraId, {
         nome: form.nome,
         endereco: enderecoCompleto,
-        cnpj: form.cnpj,
+        cnpj: somenteDigitos(form.cnpj),
         situacao: form.situacao,
       })
       setCondominios((listaAnterior) => [...listaAnterior, novoCondominio])
@@ -96,6 +104,8 @@ function CadastroCondominios({ administradoraId, condominios, setCondominios, er
             value={form.cnpj}
             onChange={atualizarCampo}
             placeholder="00.000.000/0000-00"
+            inputMode="numeric"
+            maxLength={18}
             required
           />
         </label>

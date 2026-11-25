@@ -5,6 +5,7 @@ import br.com.condominio.backend.model.Administradora;
 import br.com.condominio.backend.model.Condominio;
 import br.com.condominio.backend.repository.AdministradoraRepository;
 import br.com.condominio.backend.repository.CondominioRepository;
+import br.com.condominio.backend.util.CnpjUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,6 +25,8 @@ public class CondominioService {
     public Condominio cadastrar(Condominio condominio, Long administradoraId) {
         Administradora administradora = administradoraRepository.findById(administradoraId)
                 .orElseThrow(() -> new RegraDeNegocioException("Administradora não encontrada."));
+
+        condominio.setCnpj(CnpjUtil.normalizar(condominio.getCnpj()));
 
         if (condominioRepository.existsByCnpj(condominio.getCnpj())) {
             throw new RegraDeNegocioException("Já existe um condomínio cadastrado com este CNPJ.");
