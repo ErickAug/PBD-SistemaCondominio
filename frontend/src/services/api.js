@@ -1212,3 +1212,77 @@ export async function buscarCalendarioReservas(condominioId, mes, areaComumId) {
 
   return resposta.json()
 }
+
+export async function convocarReuniao(condominioId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reunioes`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível convocar a reunião.')
+  }
+
+  return resposta.json()
+}
+
+export async function listarReunioes(condominioId, inicio, fim) {
+  const parametros = new URLSearchParams()
+  if (inicio) parametros.set('inicio', inicio)
+  if (fim) parametros.set('fim', fim)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reunioes${query}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as reuniões.')
+  }
+
+  return resposta.json()
+}
+
+export async function detalharReuniao(condominioId, reuniaoId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reunioes/${reuniaoId}`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar a reunião.')
+  }
+
+  return resposta.json()
+}
+
+export async function registrarPresencaReuniao(condominioId, reuniaoId, dados) {
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/reunioes/${reuniaoId}/presencas`,
+    {
+      method: 'POST',
+      headers: headersAutenticados(),
+      body: JSON.stringify(dados),
+    }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível registrar a presença.')
+  }
+
+  return resposta.json()
+}
+
+export async function anexarAtaReuniao(condominioId, reuniaoId, dados) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/reunioes/${reuniaoId}/ata`, {
+    method: 'POST',
+    headers: headersAutenticados(),
+    body: JSON.stringify(dados),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível anexar a ata.')
+  }
+
+  return resposta.json()
+}

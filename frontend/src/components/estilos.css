@@ -1088,3 +1088,14 @@ h2 {
 .calendario-area h4 {
   margin: 0 0 6px;
 }
+
+.item-pauta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.item-pauta input {
+  flex: 1;
+}
