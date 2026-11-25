@@ -23,6 +23,8 @@ import AreasComuns from './components/AreasComuns.jsx'
 import MinhasReservas from './components/MinhasReservas.jsx'
 import Reunioes from './components/Reunioes.jsx'
 import MinhasReunioes from './components/MinhasReunioes.jsx'
+import MinhaArea from './components/MinhaArea.jsx'
+import SeletorUnidade from './components/SeletorUnidade.jsx'
 import SeletorCondominio from './components/SeletorCondominio.jsx'
 import {
   IconeEmpresa,
@@ -40,7 +42,7 @@ import {
   IconeReuniao,
   IconeSair,
 } from './components/IconesMenu.jsx'
-import { buscarCondominios, logout as apiLogout } from './services/api.js'
+import { buscarCondominios, listarMinhasUnidades, logout as apiLogout } from './services/api.js'
 import './App.css'
 import './components/estilos.css'
 
@@ -50,10 +52,15 @@ function App() {
   const [condominios, setCondominios] = useState([])
   const [condominioAtivoId, setCondominioAtivoId] = useState('')
   const [erroCondominios, setErroCondominios] = useState('')
+  const [minhasUnidades, setMinhasUnidades] = useState([])
+  const [unidadeAtivaId, setUnidadeAtivaId] = useState('')
+  const [carregandoUnidades, setCarregandoUnidades] = useState(true)
 
   const ehAdministradora = usuarioLogado?.perfil === 'administradora'
   const ehSindico = usuarioLogado?.perfil === 'sindico'
   const ehPortaria = usuarioLogado?.perfil === 'portaria'
+  const ehMoradorOuProprietario =
+    usuarioLogado?.perfil === 'morador' || usuarioLogado?.perfil === 'proprietario'
 
   useEffect(() => {
     if (!usuarioLogado || !ehAdministradora) return
@@ -67,6 +74,21 @@ function App() {
       })
       .catch((erro) => setErroCondominios(erro.message))
   }, [usuarioLogado, ehAdministradora])
+
+  useEffect(() => {
+    if (!usuarioLogado || !ehMoradorOuProprietario) return
+
+    setCarregandoUnidades(true)
+    listarMinhasUnidades(usuarioLogado.condominioId)
+      .then((lista) => {
+        setMinhasUnidades(lista)
+        if (lista.length > 0) {
+          setUnidadeAtivaId(lista[0].unidadeId)
+        }
+      })
+      .catch(() => setMinhasUnidades([]))
+      .finally(() => setCarregandoUnidades(false))
+  }, [usuarioLogado, ehMoradorOuProprietario])
 
   function aoFazerLogin(usuario) {
     setUsuarioLogado(usuario)
@@ -85,6 +107,8 @@ function App() {
     setTelaAtual('administradora')
     setCondominios([])
     setCondominioAtivoId('')
+    setMinhasUnidades([])
+    setUnidadeAtivaId('')
   }
 
   if (!usuarioLogado) {
@@ -93,6 +117,7 @@ function App() {
 
   const condominioAtivo = condominios.find((c) => c.id === condominioAtivoId)
   const condominiosDoSindico = [{ id: usuarioLogado.condominioId, nome: 'Meu condomínio' }]
+  const unidadeAtiva = minhasUnidades.find((u) => u.unidadeId === unidadeAtivaId) || null
 
   return (
     <div className="layout">
@@ -105,6 +130,14 @@ function App() {
             condominios={condominios}
             condominioAtivoId={condominioAtivoId}
             aoTrocar={setCondominioAtivoId}
+          />
+        )}
+
+        {ehMoradorOuProprietario && minhasUnidades.length > 0 && (
+          <SeletorUnidade
+            unidades={minhasUnidades}
+            unidadeAtivaId={unidadeAtivaId}
+            aoTrocar={setUnidadeAtivaId}
           />
         )}
 
@@ -343,22 +376,35 @@ function App() {
               <BuscaPlaca condominioId={usuarioLogado.condominioId} />
             )}
           </>
-        ) : usuarioLogado.perfil === 'morador' ||
-          (usuarioLogado.perfil === 'proprietario' && usuarioLogado.unidadeId) ? (
+        ) : ehMoradorOuProprietario ? (
           <>
+            <MinhaArea
+              condominioId={usuarioLogado.condominioId}
+              unidadeAtiva={unidadeAtiva}
+              carregandoUnidades={carregandoUnidades}
+            />
             <MeusAvisos condominioId={usuarioLogado.condominioId} />
             <MinhasOcorrencias
               condominioId={usuarioLogado.condominioId}
-              blocoId={usuarioLogado.blocoId}
-              unidadeId={usuarioLogado.unidadeId}
+              blocoId={unidadeAtiva?.blocoId}
+              unidadeId={unidadeAtiva?.unidadeId}
             />
             <MinhasReservas
               condominioId={usuarioLogado.condominioId}
-              blocoId={usuarioLogado.blocoId}
-              unidadeId={usuarioLogado.unidadeId}
+              blocoId={unidadeAtiva?.blocoId}
+              unidadeId={unidadeAtiva?.unidadeId}
+              podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
             />
             <MinhasReunioes condominioId={usuarioLogado.condominioId} />
-            <MinhaUnidade usuarioLogado={usuarioLogado} />
+            <MinhaUnidade
+              condominioId={usuarioLogado.condominioId}
+              blocoId={unidadeAtiva?.blocoId}
+              unidadeId={unidadeAtiva?.unidadeId}
+              blocoNome={unidadeAtiva?.blocoNome}
+              unidadeNumero={unidadeAtiva?.unidadeNumero}
+              usuarioId={usuarioLogado.usuarioId}
+              podeUsar={unidadeAtiva?.papeis?.includes('MORADOR') ?? false}
+            />
             <PrestacaoContasUnidade condominioId={usuarioLogado.condominioId} />
           </>
         ) : (

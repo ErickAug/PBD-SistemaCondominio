@@ -1,8 +1,6 @@
 import ListasDaUnidade from './ListasDaUnidade.jsx'
 
-function MinhaUnidade({ usuarioLogado }) {
-  const { condominioId, blocoId, blocoNome, unidadeId, unidadeNumero, usuarioId } = usuarioLogado
-
+function MinhaUnidade({ condominioId, blocoId, unidadeId, blocoNome, unidadeNumero, usuarioId, podeUsar = true }) {
   const titulo =
     blocoNome && unidadeNumero
       ? `Minha unidade: ${blocoNome}, unidade ${unidadeNumero}`
@@ -20,6 +18,11 @@ function MinhaUnidade({ usuarioLogado }) {
         <p className="aviso-vazio">
           Não foi possível identificar a sua unidade. Se você acabou de ser
           cadastrado, peça ao síndico para registrar a sua entrada.
+        </p>
+      ) : !podeUsar ? (
+        <p className="aviso-vazio">
+          Você não mora nesta unidade, então não gerencia moradores,
+          dependentes, veículos ou visitas por ela.
         </p>
       ) : (
         <ListasDaUnidade

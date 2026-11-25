@@ -145,4 +145,14 @@ describe('MinhasReservas (morador/proprietário)', () => {
       expect(buscarCalendarioReservas).toHaveBeenCalledWith(1, expect.stringMatching(/^\d{4}-\d{2}$/), null)
     })
   })
+
+  it('não permite reservar nem lista as reservas quando o usuário não mora na unidade', async () => {
+    render(<MinhasReservas condominioId={1} blocoId={2} unidadeId={10} podeUsar={false} />)
+
+    expect(
+      await screen.findByText('Você não mora nesta unidade, então não pode reservar áreas comuns por ela.'),
+    ).toBeInTheDocument()
+    expect(listarReservasDaUnidade).not.toHaveBeenCalled()
+    expect(screen.queryByRole('button', { name: 'Reservar' })).not.toBeInTheDocument()
+  })
 })
