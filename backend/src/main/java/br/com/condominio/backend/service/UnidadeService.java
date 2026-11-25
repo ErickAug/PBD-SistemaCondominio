@@ -36,8 +36,9 @@ public class UnidadeService {
     public Unidade cadastrar(Unidade unidade, Bloco blocoJaValidado) {
         validarFracaoIdeal(unidade.getFracaoIdeal());
 
-        if (unidadeRepository.existsByNumeroAndBlocoId(unidade.getNumero(), blocoJaValidado.getId())) {
-            throw new RegraDeNegocioException("Já existe uma unidade com este número neste bloco.");
+        if (unidadeRepository.existsByNumeroAndAndarAndBlocoId(
+                unidade.getNumero(), unidade.getAndar(), blocoJaValidado.getId())) {
+            throw new RegraDeNegocioException("Já existe uma unidade com este número e andar neste bloco.");
         }
 
         unidade.setBloco(blocoJaValidado);

@@ -98,7 +98,7 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
       await apiCadastrarUnidade(condominioId, formUnidade.blocoId, {
         numero: formUnidade.numero,
         andar: Number(formUnidade.andar),
-        area: Number(formUnidade.area),
+        area: formUnidade.area === '' ? null : Number(formUnidade.area),
         fracaoIdeal: fracao,
       })
       setFormUnidade({ ...FORM_UNIDADE_VAZIO, blocoId: formUnidade.blocoId })
@@ -133,14 +133,26 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
     statusTexto: unidade.ocupada ? 'Ocupada' : 'Vaga',
   }))
 
+  const unidadesSemProprietario = unidades.filter((u) => !u.proprietarioId).length
+
   const colunasUnidades = [
     { chave: 'blocoNome', titulo: 'Bloco' },
     { chave: 'numero', titulo: 'Unidade' },
     { chave: 'andar', titulo: 'Andar' },
     {
+      chave: 'proprietarioId',
+      titulo: 'Proprietário',
+      renderizar: (item) =>
+        item.proprietarioId ? (
+          <span className="selo selo-ativo">Definido</span>
+        ) : (
+          <span className="selo selo-vencido">Sem proprietário</span>
+        ),
+    },
+    {
       chave: 'area',
       titulo: 'Área',
-      renderizar: (item) => `${item.area} m²`,
+      renderizar: (item) => (item.area != null ? `${item.area} m²` : '—'),
     },
     {
       chave: 'fracaoIdeal',
@@ -205,6 +217,15 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
       </p>
 
       {erroCarregamento && <p className="alerta-erro">{erroCarregamento}</p>}
+
+      {unidadesSemProprietario > 0 && (
+        <div className="painel-fracao alerta">
+          <strong>{unidadesSemProprietario}</strong>{' '}
+          {unidadesSemProprietario === 1 ? 'unidade está' : 'unidades estão'} sem
+          proprietário cadastrado — isso vai bloquear o fechamento do rateio
+          do mês pra elas.
+        </div>
+      )}
 
       {statusFracao && (
         <div className={statusFracao.fechaEm100 ? 'painel-fracao ok' : 'painel-fracao alerta'}>
@@ -298,14 +319,13 @@ function BlocosUnidades({ nomeCondominio, condominioId }) {
 
           <div className="linha-dois-campos">
             <label className="campo">
-              <span>Área (m²)</span>
+              <span>Área (m²) — opcional</span>
               <input
                 type="number"
                 step="0.01"
                 name="area"
                 value={formUnidade.area}
                 onChange={atualizarCampoUnidade}
-                required
               />
             </label>
             <label className="campo">
