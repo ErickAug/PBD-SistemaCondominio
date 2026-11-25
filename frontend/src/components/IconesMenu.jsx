@@ -119,6 +119,16 @@ export function IconeReserva(props) {
   )
 }
 
+export function IconeReuniao(props) {
+  return (
+    <svg {...propsBase} {...props}>
+      <rect x="4" y="3" width="10" height="13" rx="1" pathLength="1" />
+      <path d="M6.5 3V2.3a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V3" pathLength="1" />
+      <path d="M6.3 7.3h5.4M6.3 9.7h5.4M6.3 12.1h3.4" pathLength="1" />
+    </svg>
+  )
+}
+
 export function IconeSair(props) {
   return (
     <svg {...propsBase} {...props}>
