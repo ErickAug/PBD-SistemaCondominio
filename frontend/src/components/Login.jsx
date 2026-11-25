@@ -25,19 +25,20 @@ function Login({ onLogin }) {
 
   return (
     <div className="tela-login">
-      <aside className="login-identidade">
-        <IconePredio
-          aria-hidden="true"
-          strokeWidth="0.6"
-          className="login-identidade-marca-dagua"
-        />
-        <IconePredio className="login-identidade-icone" />
-        <h1>Condomínios</h1>
-        <p>Gestão de blocos, unidades, portaria e prestação de contas em um só lugar.</p>
-      </aside>
+      <div className="login-fundo" role="presentation" aria-hidden="true" />
+      <div className="login-scrim" role="presentation" aria-hidden="true" />
 
-      <div className="login-formulario-area">
-        <form onSubmit={aoEnviar} className="formulario cartao-login">
+      <div className="login-marca">
+        <IconePredio className="login-marca-icone" aria-hidden="true" />
+        <span className="login-marca-titulo">Condomínios</span>
+      </div>
+
+      <p className="login-tagline">
+        Gestão de blocos, unidades, portaria e prestação de contas em um só lugar.
+      </p>
+
+      <div className="login-cartao-area">
+        <form onSubmit={aoEnviar} className="formulario cartao-login cartao-login-vidro">
           <h2 className="login-titulo">Entrar</h2>
           <p className="descricao">Acesso ao sistema de gestão de condomínios.</p>
 
