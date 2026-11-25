@@ -1286,3 +1286,32 @@ export async function anexarAtaReuniao(condominioId, reuniaoId, dados) {
 
   return resposta.json()
 }
+
+export async function listarMinhasUnidades(condominioId) {
+  const resposta = await fetch(`${API_URL}/condominios/${condominioId}/minha-area/unidades`, {
+    headers: headersAutenticados(),
+  })
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar as suas unidades.')
+  }
+
+  return resposta.json()
+}
+
+export async function buscarPainelUnidade(condominioId, unidadeId, competencia) {
+  const parametros = new URLSearchParams()
+  if (competencia) parametros.set('competencia', competencia)
+  const query = parametros.toString() ? `?${parametros.toString()}` : ''
+
+  const resposta = await fetch(
+    `${API_URL}/condominios/${condominioId}/minha-area/unidades/${unidadeId}${query}`,
+    { headers: headersAutenticados() }
+  )
+
+  if (!resposta.ok) {
+    await lancarErroComMensagem(resposta, 'Não foi possível carregar o painel da unidade.')
+  }
+
+  return resposta.json()
+}

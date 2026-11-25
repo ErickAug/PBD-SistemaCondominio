@@ -40,7 +40,7 @@ function podeCancelar(reserva) {
   return SITUACOES_ATIVAS.includes(reserva.situacao) && reserva.data > hoje()
 }
 
-function MinhasReservas({ condominioId, blocoId, unidadeId }) {
+function MinhasReservas({ condominioId, blocoId, unidadeId, podeUsar = true }) {
   const formVazio = { areaComumId: '', data: '', horaInicio: '', horaFim: '', finalidade: '' }
 
   const [areas, setAreas] = useState([])
@@ -60,7 +60,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId }) {
   }, [condominioId])
 
   const carregar = useCallback(() => {
-    if (!blocoId || !unidadeId) {
+    if (!blocoId || !unidadeId || !podeUsar) {
       setCarregando(false)
       return
     }
@@ -70,7 +70,7 @@ function MinhasReservas({ condominioId, blocoId, unidadeId }) {
       .then(setReservas)
       .catch((e) => { setErroLista(e.message); setReservas([]) })
       .finally(() => setCarregando(false))
-  }, [condominioId, blocoId, unidadeId])
+  }, [condominioId, blocoId, unidadeId, podeUsar])
 
   useEffect(() => {
     carregar()
@@ -172,47 +172,55 @@ function MinhasReservas({ condominioId, blocoId, unidadeId }) {
         estar em dia com as cobranças para reservar.
       </p>
 
-      <h3 className="subtitulo-secao">Nova reserva</h3>
-      <form onSubmit={reservar} className="formulario-inline">
-        <label className="campo">
-          <span>Área comum</span>
-          <select name="areaComumId" value={form.areaComumId} onChange={atualizarCampo}>
-            <option value="">Selecione</option>
-            {areas.map((a) => (<option key={a.id} value={a.id}>{a.nome}</option>))}
-          </select>
-        </label>
-        <label className="campo">
-          <span>Data</span>
-          <input type="date" name="data" value={form.data} onChange={atualizarCampo} min={hoje()} />
-        </label>
-        <label className="campo">
-          <span>Início</span>
-          <input type="time" name="horaInicio" value={form.horaInicio} onChange={atualizarCampo} />
-        </label>
-        <label className="campo">
-          <span>Fim</span>
-          <input type="time" name="horaFim" value={form.horaFim} onChange={atualizarCampo} />
-        </label>
-        <label className="campo campo-descricao-ocorrencia">
-          <span>Finalidade</span>
-          <input name="finalidade" value={form.finalidade} onChange={atualizarCampo} placeholder="Ex: Aniversário de 10 anos" />
-        </label>
-        <button type="submit" className="botao-primario" disabled={salvando}>
-          {salvando ? 'Reservando...' : 'Reservar'}
-        </button>
-      </form>
-      {erroForm && <p className="alerta-erro">{erroForm}</p>}
+      {podeUsar ? (
+        <>
+          <h3 className="subtitulo-secao">Nova reserva</h3>
+          <form onSubmit={reservar} className="formulario-inline">
+            <label className="campo">
+              <span>Área comum</span>
+              <select name="areaComumId" value={form.areaComumId} onChange={atualizarCampo}>
+                <option value="">Selecione</option>
+                {areas.map((a) => (<option key={a.id} value={a.id}>{a.nome}</option>))}
+              </select>
+            </label>
+            <label className="campo">
+              <span>Data</span>
+              <input type="date" name="data" value={form.data} onChange={atualizarCampo} min={hoje()} />
+            </label>
+            <label className="campo">
+              <span>Início</span>
+              <input type="time" name="horaInicio" value={form.horaInicio} onChange={atualizarCampo} />
+            </label>
+            <label className="campo">
+              <span>Fim</span>
+              <input type="time" name="horaFim" value={form.horaFim} onChange={atualizarCampo} />
+            </label>
+            <label className="campo campo-descricao-ocorrencia">
+              <span>Finalidade</span>
+              <input name="finalidade" value={form.finalidade} onChange={atualizarCampo} placeholder="Ex: Aniversário de 10 anos" />
+            </label>
+            <button type="submit" className="botao-primario" disabled={salvando}>
+              {salvando ? 'Reservando...' : 'Reservar'}
+            </button>
+          </form>
+          {erroForm && <p className="alerta-erro">{erroForm}</p>}
 
-      <h3 className="subtitulo-secao">Minhas reservas</h3>
-      {erroCancelar && <p className="alerta-erro">{erroCancelar.mensagem}</p>}
-      <TabelaDados
-        colunas={colunas}
-        dados={reservas}
-        camposBusca={['areaComumNome', 'finalidade']}
-        buscaPlaceholder="Buscar por área ou finalidade..."
-        mensagemVazia={carregando ? 'Carregando...' : 'Nenhuma reserva ainda.'}
-        mensagemErro={erroLista}
-      />
+          <h3 className="subtitulo-secao">Minhas reservas</h3>
+          {erroCancelar && <p className="alerta-erro">{erroCancelar.mensagem}</p>}
+          <TabelaDados
+            colunas={colunas}
+            dados={reservas}
+            camposBusca={['areaComumNome', 'finalidade']}
+            buscaPlaceholder="Buscar por área ou finalidade..."
+            mensagemVazia={carregando ? 'Carregando...' : 'Nenhuma reserva ainda.'}
+            mensagemErro={erroLista}
+          />
+        </>
+      ) : (
+        <p className="aviso-vazio">
+          Você não mora nesta unidade, então não pode reservar áreas comuns por ela.
+        </p>
+      )}
 
       <h3 className="subtitulo-secao">Calendário de reservas</h3>
       <CalendarioReservas condominioId={condominioId} />
